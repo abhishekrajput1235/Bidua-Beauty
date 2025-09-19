@@ -12,6 +12,13 @@ import CostCalculatorPage from './pages/CostCalculatorPage';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import ConfirmationPage from './pages/ConfirmationPage';
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
+import JoinBrppPage from './pages/JoinBrppPage';
+import B2bCatalogPage from './pages/B2bCatalogPage';
+import PartnerWalletPage from './pages/PartnerWalletPage';
+import UserProfilePage from './pages/UserProfilePage';
+import QueueTrackerPage from './pages/QueueTrackerPage';
 
 function App() {
   return (
@@ -33,6 +40,13 @@ function App() {
         <Route path="/cart" element={<CartPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/confirmation" element={<ConfirmationPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/join-brpp" element={<JoinBrppPage />} />
+        <Route path="/b2b-catalog" element={<B2bCatalogPage />} />
+        <Route path="/partner-wallet" element={<PartnerWalletPage />} />
+        <Route path="/user-profile" element={<UserProfilePage />} />
+        <Route path="/queue-tracker" element={<QueueTrackerPage />} />
       </Routes>
     </div>
   );
