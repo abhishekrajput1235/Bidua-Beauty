@@ -1,0 +1,452 @@
+{
+  "navigation": {
+    "home": "Home",
+    "benefits": "Benefits",
+    "ingredients": "Ingredients",
+    "details": "Details",
+    "reviews": "Reviews",
+    "costCalculator": "Cost Calculator"
+  },
+  "hero": {
+    "premiumSkincare": "Premium Skincare",
+    "brandName": "BIDUA",
+    "productName": "RADIANCE 15",
+    "tagline": "True Glow in 15 Days",
+    "description": "Reduces dark spots, repairs sun damage, and restores natural skin tone with our revolutionary formula. Experience visible results in just 15 days with premium saffron oil and natural ingredients designed for all skin types.",
+    "rating": "4.9/5 from 2,847 reviews",
+    "orderButton": "Order Now - ₹1,499",
+    "originalPrice": "₹4,999",
+    "learnMore": "Learn More"
+  },
+  "benefits": {
+    "title": "Why Choose",
+    "brandName": "BIDUA Beauty",
+    "subtitle": "Experience the perfect blend of luxury and nature with our revolutionary cream for men, women, and even children",
+    "experienceButton": "Experience the Difference",
+    "benefit1": {
+      "title": "Reduces Dark Spots & Pigmentation",
+      "description": "Powered by Alpha Arbutin, Saffron Oil & Vitamin B3 to fade marks and even skin tone."
+    },
+    "benefit2": {
+      "title": "Brightens Skin Tone",
+      "description": "Restores natural color to match the nose-tip tone (the true skin tone)."
+    },
+    "benefit3": {
+      "title": "Anti-Aging Care",
+      "description": "Vitamins A, C, and E reduce fine lines & wrinkles while promoting youthful skin."
+    },
+    "benefit4": {
+      "title": "Under-Eye Dark Circles",
+      "description": "Night repair action targets dullness and puffiness around the eyes."
+    },
+    "benefit5": {
+      "title": "Sun Protection & Damage Repair",
+      "description": "With Zinc Oxide + Vitamin E to protect and heal sun-damaged skin."
+    },
+    "benefit6": {
+      "title": "Baby Rash Relief",
+      "description": "Gentle formulation to soothe and heal diaper rashes safely."
+    },
+    "benefit7": {
+      "title": "Hydration & Softness",
+      "description": "Natural wax, glycerin, and almond nourish deeply for lasting moisture."
+    },
+    "benefit8": {
+      "title": "Visible Results",
+      "description": "Within 15 days at night and 30 days with daily use - guaranteed improvement."
+    },
+    "benefit9": {
+      "title": "Natural & Safe",
+      "description": "Made with natural ingredients, free from parabens, sulfates, and harsh chemicals."
+    },
+    "benefit10": {
+      "title": "Day & Night Care",
+      "description": "Protects during the day and repairs at night for comprehensive skincare."
+    },
+    "benefit11": {
+      "title": "Multi-Purpose Formula",
+      "description": "Anti-Aging + Brightening + Rash Relief in one cream for the whole family."
+    },
+    "benefit12": {
+      "title": "Luxurious Saffron Fragrance",
+      "description": "Enjoy a spa-like experience with our premium saffron-scented formula."
+    }
+  },
+  "ingredients": {
+    "title": "Premium",
+    "premium": "Ingredients",
+    "subtitle": "Each ingredient is carefully selected and sourced from the finest suppliers worldwide",
+    "ingredient1": {
+      "name": "Ionized Water",
+      "description": "Deeply hydrates and improves absorption of nutrients. Helps detoxify skin and maintain pH balance."
+    },
+    "ingredient2": {
+      "name": "Vitamin A",
+      "description": "Boosts cell turnover, reduces wrinkles, and keeps skin smooth."
+    },
+    "ingredient3": {
+      "name": "Vitamin B Complex",
+      "description": "Repairs damaged skin, reduces pigmentation, and maintains an even skin tone."
+    },
+    "ingredient4": {
+      "name": "Vitamin B3 (Niacinamide)",
+      "description": "Brightens skin, reduces dark spots, and strengthens the skin barrier."
+    },
+    "ingredient5": {
+      "name": "Vitamin C",
+      "description": "Powerful antioxidant that brightens skin tone and protects against free radicals."
+    },
+    "ingredient6": {
+      "name": "Vitamin E",
+      "description": "Deep moisturizer, protects against sun damage, and reduces scars."
+    },
+    "ingredient7": {
+      "name": "Alpha Arbutin",
+      "description": "A natural skin-brightening agent that reduces melanin production, helping fade dark spots and patches safely."
+    },
+    "ingredient8": {
+      "name": "Zinc Oxide",
+      "description": "Provides natural sun protection, prevents UV damage, and soothes irritation."
+    },
+    "ingredient9": {
+      "name": "Walnut Shell Powder",
+      "description": "A natural exfoliant that gently removes dead skin cells and promotes skin renewal."
+    },
+    "ingredient10": {
+      "name": "Almond Powder",
+      "description": "Rich in Vitamin E & healthy fats, it nourishes, softens, and gives skin a healthy glow."
+    },
+    "ingredient11": {
+      "name": "Natural Wax",
+      "description": "Forms a protective layer on the skin to lock in moisture without clogging pores."
+    },
+    "ingredient12": {
+      "name": "Saffron Oil",
+      "description": "Premium saffron extract that helps reduce dark circles, promotes fairness, and provides natural glow."
+    },
+    "ingredient13": {
+      "name": "All-Purpose Essential Oil Blend",
+      "description": "Nourishes, calms inflammation, and prevents infections."
+    },
+    "ingredient14": {
+      "name": "Saffron Fragrance",
+      "description": "Provides a luxurious, refreshing aroma that uplifts mood and adds a spa-like experience."
+    }
+  },
+  "testimonials": {
+    "title": "What Our",
+    "customers": "Customers Say",
+    "subtitle": "Join thousands of satisfied customers who've transformed their skin with BIDUA Beauty",
+    "averageRating": "4.9/5 Average Rating",
+    "fromReviews": "from 5,000+ reviews",
+    "age": "Age",
+    "testimonial1": {
+      "name": "Sarah Johnson",
+      "age": "34",
+      "location": "New York, USA",
+      "text": "I've tried countless face creams, but nothing compares to BIDUA Radiance 15. The saffron oil formula completely eliminated my dark circles in 30 days!"
+    },
+    "testimonial2": {
+      "name": "Maria Rodriguez",
+      "age": "42",
+      "location": "Los Angeles, USA",
+      "text": "The natural ingredients work amazingly! My husband and I both use it. Even helped with my baby's diaper rash - so gentle and effective!"
+    },
+    "testimonial3": {
+      "name": "Emma Thompson",
+      "age": "38",
+      "location": "London, UK",
+      "text": "100% recovery on my dark spots! I apply it thick at night as recommended and the fairness results are unbeatable. Worth every penny!"
+    }
+  },
+  "cta": {
+    "title": "Transform Your Skin Today",
+    "subtitle": "Apply as normal cream during the day, and a thicker layer overnight for best results. See remarkable transformation in 15 days. Join 5000+ satisfied customers worldwide.",
+    "originalPrice": "₹4,999",
+    "currentPrice": "₹1,499",
+    "specialOffer": "Pre-Launch Special Offer",
+    "orderButton": "Order Now - Fast Delivery",
+    "feature1": "30-Day Money Back Guarantee",
+    "feature2": "Fast Worldwide Delivery",
+    "feature3": "Easy Returns & Exchanges"
+  },
+  "footer": {
+    "brandName": "BIDUA",
+    "brandSuffix": "BEAUTY",
+    "description": "Premium skincare crafted with the finest ingredients and cutting-edge technology. Experience the luxury of perfect skin.",
+    "quickLinks": "Quick Links",
+    "contactUs": "Contact Us",
+    "email": "support@biduaindustries.com",
+    "phone": "+91 80 4567 8900",
+    "address": "Plot No. 456, Industrial Area, Phase 2, Electronic City, Bengaluru, Karnataka 560100",
+    "copyright": "© 2024 BIDUA Industries Private Limited. All rights reserved.",
+    "privacyPolicy": "Privacy Policy",
+    "privacyPolicyText": "Privacy Policy: We protect your personal information and never share it with third parties. Your data is encrypted and secure.",
+    "termsOfService": "Terms of Service",
+    "termsText": "Terms of Service: By purchasing BIDUA Beauty products, you agree to our quality guarantee and 30-day return policy. All sales are processed securely.",
+    "shippingInfo": "Shipping Info",
+    "shippingText": "Shipping Information: Free shipping on orders over ₹2000. Standard delivery 3-5 business days. Express delivery available. International shipping to 50+ countries."
+  },
+  "cart": {
+    "title": "Shopping Cart",
+    "subtitle": "Review your items before checkout",
+    "empty": "Your Cart is Empty",
+    "emptySubtitle": "Add some products to get started",
+    "continueShopping": "Continue Shopping",
+    "quantity": "Quantity:",
+    "orderSummary": "Order Summary",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "total": "Total",
+    "proceedToCheckout": "Proceed to Checkout",
+    "secureCheckout": "✓ Secure Checkout",
+    "fastDelivery": "✓ Fast Delivery",
+    "returns": "✓ 30-Day Returns"
+  },
+  "checkout": {
+    "title": "Secure Checkout",
+    "subtitle": "Complete your order with confidence",
+    "noItems": "No Items to Checkout",
+    "backToCart": "Back to Cart",
+    "customerInformation": "Customer Information",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email Address",
+    "phone": "Phone Number",
+    "address": "Address",
+    "city": "City",
+    "state": "State",
+    "pincode": "PIN Code",
+    "paymentMethod": "Payment Method",
+    "creditCard": "Credit/Debit Card",
+    "secure": "SECURE",
+    "cashOnDelivery": "Cash on Delivery",
+    "comingSoon": "Coming Soon",
+    "placeOrder": "Place Secure Order",
+    "processingPayment": "Processing Payment...",
+    "securityFeatures": {
+      "title": "Secure Checkout",
+      "ssl": "✓ SSL encrypted payment processing",
+      "protection": "✓ Your personal information is protected",
+      "guarantee": "✓ 30-day money-back guarantee",
+      "delivery": "✓ Fast and reliable delivery"
+    }
+  },
+  "confirmation": {
+    "title": "Order Confirmed!",
+    "subtitle": "Thank you for your purchase! Your order has been successfully placed.",
+    "orderDetails": "Order Details",
+    "orderNumber": "Order Number:",
+    "customer": "Customer:",
+    "email": "Email:",
+    "phone": "Phone:",
+    "deliveryInformation": "Delivery Information",
+    "address": "Address:",
+    "estimatedDelivery": "Estimated Delivery:",
+    "shipping": "Shipping:",
+    "free": "FREE",
+    "orderStatus": "Order Status",
+    "orderPlaced": "Order Placed",
+    "processing": "Processing",
+    "shipped": "Shipped",
+    "delivered": "Delivered",
+    "whatsNext": "What's Next?",
+    "nextSteps": {
+      "confirmation": "✓ You'll receive an order confirmation email shortly",
+      "tracking": "✓ We'll send you tracking information once your order ships",
+      "packaging": "✓ Your LuxeGlow Face Cream will be carefully packaged and shipped within 24 hours",
+      "guarantee": "✓ Enjoy free shipping and our 30-day money-back guarantee"
+    },
+    "printReceipt": "Print Receipt",
+    "support": "Need help with your order?",
+    "email": "📧 support@luxeglow.com",
+    "phone": "📞 +91 555 123 4567"
+  },
+  "productDetails": {
+    "naturalGlowCream": {
+      "natural": "Natural",
+      "glow": "Glow",
+      "cream": "Cream"
+    },
+    "introduction": {
+      "description": "Healthy, radiant skin is not just about beauty — it's about confidence and self-care. Our BIDUA Radiance 15, enriched with the power of Saffron Oil, Vitamins, Essential Oils, and Natural Exfoliants, is designed to nourish, protect, and restore your skin day and night.",
+      "benefits": "From reducing dark spots, sunburn marks, fine lines, and under-eye darkness to being gentle enough for baby rashes, this is more than a cream — it's a complete skincare solution trusted by tradition and perfected with modern formulation."
+    },
+    "uniqueFeatures": {
+      "title": "What Makes Our Cream",
+      "unique": "Unique?",
+      "feature1": {
+        "title": "Daily Repair & Glow",
+        "description": "Keeps skin hydrated, nourished, and naturally bright."
+      },
+      "feature2": {
+        "title": "Dark Spot & Pigmentation Solution",
+        "description": "Works deeply to fade marks and restore even skin tone."
+      },
+      "feature3": {
+        "title": "Day & Night Care",
+        "description": "Protects in the day, repairs at night for 24/7 skincare."
+      },
+      "feature4": {
+        "title": "Multi-Purpose Formula",
+        "description": "Safe for adults and babies - gentle yet effective."
+      },
+      "feature5": {
+        "title": "Visible Results",
+        "description": "Noticeable improvements within 15–30 days of consistent use."
+      }
+    },
+    "howToUse": {
+      "title": "How to",
+      "use": "Use",
+      "usage1": {
+        "title": "For Daytime Use",
+        "steps": [
+          "Wash your face with a mild cleanser",
+          "Apply a thin layer of cream evenly on face, under-eye, and neck",
+          "Massage gently until absorbed",
+          "Acts as a moisturizer + natural protector"
+        ]
+      },
+      "usage2": {
+        "title": "For Nighttime Use (Special Repair)",
+        "steps": [
+          "Cleanse your skin before bedtime",
+          "Apply a slightly thick layer on dark circles and affected areas",
+          "Leave overnight for deep repair",
+          "Within 15 days, reduces dark circles and restores natural glow"
+        ]
+      },
+      "usage3": {
+        "title": "For Baby Rashes",
+        "steps": [
+          "Apply a thin layer on clean, dry skin",
+          "Gently massage to soothe diaper rashes",
+          "Prevents redness and promotes healing"
+        ]
+      }
+    },
+    "whyItWorks": {
+      "title": "Why It",
+      "works": "Works",
+      "description": "Your skin repairs itself naturally at night. Our cream supports this process by:",
+      "reasons": [
+        "Boosting collagen production for firmer skin",
+        "Neutralizing free radicals that cause aging",
+        "Fading dark spots & pigmentation naturally",
+        "Maintaining hydration & barrier protection"
+      ],
+      "conclusion": "That's why results are visible in just 15–30 days."
+    },
+    "whoCanUse": {
+      "title": "Who Can",
+      "use": "Use It?",
+      "users": [
+        "Men & women of all ages",
+        "All skin types (dry, oily, sensitive, combination)",
+        "Safe for babies (for diaper rashes)",
+        "Suitable for daily, long-term use"
+      ]
+    },
+    "faqs": {
+      "title": "Frequently Asked",
+      "questions": "Questions",
+      "items": [
+        {
+          "question": "How soon will I see results?",
+          "answer": "Night use (thick layer): Dark spots & circles reduce within 15 days. Daily use (thin layer): Skin becomes brighter & smoother in 30 days."
+        },
+        {
+          "question": "Is it safe for sensitive skin?",
+          "answer": "⚠️ MANDATORY PATCH TEST REQUIRED: While made with natural ingredients and free from parabens, sulfates, and harsh chemicals, we STRICTLY recommend a patch test before use, especially for sensitive skin. Test on your inner wrist or behind your ear and wait 24-48 hours. Even natural ingredients can cause reactions in sensitive individuals. Never apply directly to face without patch testing first."
+        },
+        {
+          "question": "Can men use it?",
+          "answer": "Absolutely. Our cream works for both men and women of all ages. Skincare has no gender boundaries!"
+        },
+        {
+          "question": "Does it protect from the sun?",
+          "answer": "Yes, Zinc Oxide acts as a natural sunscreen, providing protection against harmful UV rays while nourishing your skin."
+        },
+        {
+          "question": "Will it really restore natural skin color?",
+          "answer": "Yes — with consistent use, skin tone naturally returns to its true color tone (nose-tip shade). Results are visible and lasting."
+        },
+        {
+          "question": "Should I do a patch test before using? What about after waxing or other treatments?",
+          "answer": "⚠️ MANDATORY PATCH TEST: Always test on your inner wrist or behind your ear first. Wait 24-48 hours to check for any allergic reactions. IMPORTANT FOR SENSITIVE SKIN: If you've had facial waxing, threading, chemical peels, or laser treatments, wait 48-72 hours before applying. Never apply a thick layer on freshly treated or sensitive skin with open pores as it may cause burning or irritation. Start with a very thin layer and gradually increase if no adverse reactions occur."
+        }
+      ]
+    },
+    "finalCTA": {
+      "title": "Don't wait for flawless skin — start your",
+      "journey": "15-day glow journey",
+      "today": "today!",
+      "description": "Join thousands of satisfied customers who've transformed their skin with our Natural Glow Cream.",
+      "orderButton": "Order Now - ₹1,499",
+      "learnMore": "Learn More"
+    }
+  },
+  "costCalculator": {
+    "title": "Cost Calculator Access",
+    "subtitle": "Enter your credentials to access the production calculator",
+    "backToHome": "Back to Home",
+    "userId": "User ID",
+    "password": "Password",
+    "enterUserId": "Enter user ID",
+    "enterPassword": "Enter password",
+    "accessCalculator": "Access Calculator",
+    "authenticating": "Authenticating...",
+    "invalidCredentials": "Invalid credentials. Please try again.",
+    "authorizedPersonnel": "This calculator is for authorized personnel only",
+    "demoCredentials": "Demo Credentials",
+    "calculatorTitle": "Cream Production Calculator",
+    "calculatorSubtitle": "Calculate your cream production costs with recipe-based formulation. Define your base material and additives in proportion. Currency: INR (₹).",
+    "inputParameters": "Input Parameters",
+    "jarSize": "Jar Size (g)",
+    "howManyJars": "How many jars to make",
+    "recipeFormulation": "Recipe Formulation",
+    "howRecipeWorks": "How Recipe Works",
+    "baseMaterial": "Base Material",
+    "additives": "Additives",
+    "packagingOperations": "Packaging & Operations",
+    "sellingPrices": "Selling Prices",
+    "resetDefaults": "Reset to defaults"
+  },
+  "footer": {
+    "description": "Premium skincare crafted with the finest ingredients and cutting-edge technology. Experience the luxury of perfect skin.",
+    "quickLinks": "Quick Links",
+    "contactUs": "Contact Us",
+    "email": "support@biduaindustries.com",
+    "phone": "+91 80 4567 8900",
+    "address": "Plot No. 456, Industrial Area, Phase 2, Electronic City, Bengaluru, Karnataka 560100",
+    "copyright": "© 2024 LuxeGlow. All rights reserved.",
+    "copyright": "© 2024 BIDUA Beauty. All rights reserved. crafted with ❤️ in India",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "shippingInfo": "Shipping Info"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "close": "Close",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "remove": "Remove",
+    "update": "Update",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "next": "Next",
+    "previous": "Previous",
+    "back": "Back",
+    "continue": "Continue",
+    "submit": "Submit",
+    "reset": "Reset"
+  }
+}
