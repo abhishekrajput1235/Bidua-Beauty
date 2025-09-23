@@ -43,7 +43,7 @@ bidua-beauty-web/
 
 ⚙️ Setup & Run Locally
 # Clone the repo
-git clone https://github.com/your-username/bidua-beauty-web.git
+git clone [https://github.com/your-username/bidua-beauty-web.git](https://github.com/abhishekrajput1235/Bidua-Beauty.git)
 
 # Go into project directory
 cd bidua-beauty-web
