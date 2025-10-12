@@ -1,12 +1,20 @@
 {
-  "navigation": {
+   "navigation": {
     "home": "Home",
     "benefits": "Benefits",
     "ingredients": "Ingredients",
     "details": "Details",
     "reviews": "Reviews",
-    "costCalculator": "Cost Calculator"
+    "joinBrpp": "Join BRPP",
+    "b2bCatalog": "B2B Catalog",
+    "partnerWallet": "Partner Wallet",
+    "profile": "User Profile",
+    "logout": "Logout",
+    "login": "Login",
+    "signup": "Sign Up",
+    "cart": "Shopping Cart"
   },
+  "logout_success": "Logged out successfully! 👋",
   "hero": {
     "premiumSkincare": "Premium Skincare",
     "brandName": "BIDUA",
@@ -413,19 +421,63 @@
     "sellingPrices": "Selling Prices",
     "resetDefaults": "Reset to defaults"
   },
+
   "footer": {
-    "description": "Premium skincare crafted with the finest ingredients and cutting-edge technology. Experience the luxury of perfect skin.",
-    "quickLinks": "Quick Links",
-    "contactUs": "Contact Us",
-    "email": "support@biduaindustries.com",
-    "phone": "+91 80 4567 8900",
-    "address": "Plot No. 456, Industrial Area, Phase 2, Electronic City, Bengaluru, Karnataka 560100",
-    "copyright": "© 2024 LuxeGlow. All rights reserved.",
-    "copyright": "© 2024 BIDUA Beauty. All rights reserved. crafted with ❤️ in India",
-    "privacyPolicy": "Privacy Policy",
-    "termsOfService": "Terms of Service",
-    "shippingInfo": "Shipping Info"
-  },
+    "brand": {
+      "name": "BIDUA Industries",
+      "suffix": "Private Limited",
+      "description": "Premium skincare crafted with the finest ingredients and cutting-edge technology. Experience the luxury of perfect skin."
+    },
+    "socials": {
+      "facebook": "#",
+      "twitter": "#",
+      "instagram": "#"
+    },
+    "quickLinks": {
+      "title": "Quick Links",
+      "links": [
+        { "label": "Home", "href": "#hero" },
+        { "label": "Benefits", "href": "#benefits" },
+        { "label": "Ingredients", "href": "#ingredients" },
+        { "label": "Details", "href": "#product-details" },
+        { "label": "Reviews", "href": "#testimonials" },
+        { "label": "Cost Calculator", "href": "/cost-calculator" },
+        { "label": "Join BRPP", "href": "/join-brpp" }
+      ]
+    },
+    "contact": {
+      "title": "Contact Us",
+      "email": {
+        "label": "support@biduabeauty.com",
+        "href": "mailto:support@biduabeauty.com"
+      },
+      "phone": {
+        "label": "",
+        "href": ""
+      },
+      "address": {
+        "label": "",
+        "mapUrl": ""
+      }
+    },
+    "legal": [
+      {
+        "label": "Privacy Policy",
+        "alert": "Privacy Policy: We protect your personal information and never share it with third parties. Your data is encrypted and secure."
+      },
+      {
+        "label": "Terms of Service",
+        "alert": "Terms of Service: By purchasing BIDUA Beauty products, you agree to our quality guarantee and 30-day return policy. All sales are processed securely."
+      },
+      {
+        "label": "Shipping Info",
+        "alert": "Shipping Information: Free shipping on orders over ₹2000. Standard delivery 3-5 business days. Express delivery available. International shipping to 50+ countries."
+      }
+    ],
+    "copyright": "© 2024 BIDUA Beauty. All rights reserved. crafted with ❤️ in India"
+  }
+,
+
   "common": {
     "loading": "Loading...",
     "error": "Error",

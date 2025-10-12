@@ -1,53 +1,35 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+// context/AuthContext.tsx (example wrapper)
+import { createContext, useContext } from "react";
+import { useAuthStore } from "../store/authStore";
 
-interface AuthContextType {
+interface AuthContextProps {
   isLoggedIn: boolean;
-  login: (username: string, password: string) => boolean;
+  user: any;
+  login: (email: string, password: string) => Promise<void>;
+  signup: (email: string, phone: string, password: string) => Promise<void>;
   logout: () => void;
-  user: { id: string; email: string; isBrppMember: boolean } | null;
+  loading: boolean;
+  error: string | null;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextProps>({} as AuthContextProps);
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const user = useAuthStore((state) => state.user);
+  const token = useAuthStore((state) => state.token);
+  const login = useAuthStore((state) => state.login);
+  const signup = useAuthStore((state) => state.signup);
+  const logout = useAuthStore((state) => state.logout);
+  const loading = useAuthStore((state) => state.loading);
+  const error = useAuthStore((state) => state.error);
+
+  const isLoggedIn = !!user && !!token;
+
+  return (
+    <AuthContext.Provider value={{ user, isLoggedIn, login, signup, logout, loading, error }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
-interface AuthProviderProps {
-  children: ReactNode;
-}
-
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState<{ id: string; email: string; isBrppMember: boolean } | null>(null);
-
-  // Static login logic for demonstration
-  const login = (username: string, password: string) => {
-    if (username === '1234' && password === '1234') {
-      setIsLoggedIn(true);
-      setUser({ id: 'user-1234', email: 'user@example.com', isBrppMember: true }); // Simulate BRPP member
-      return true;
-    }
-    setIsLoggedIn(false);
-    setUser(null);
-    return false;
-  };
-
-  const logout = () => {
-    setIsLoggedIn(false);
-    setUser(null);
-  };
-
-  const value: AuthContextType = {
-    isLoggedIn,
-    login,
-    logout,
-    user,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
+export const useAuth = () => useContext(AuthContext);
