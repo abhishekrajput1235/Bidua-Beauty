@@ -1,5 +1,3 @@
-
-
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -50,13 +48,13 @@ const CartPage = () => {
     await removeFromCart(productId);
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-black text-white text-xl">
-        Loading your cart...
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center bg-black text-white text-xl">
+  //       Loading your cart...
+  //     </div>
+  //   );
+  // }
 
   if ((!cart || cart.length === 0) && (!orders || orders.length === 0)) {
     return (

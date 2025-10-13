@@ -67,7 +67,7 @@ function App() {
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/forgot-pass" element={<ForgotPasswordPage/>} />
         <Route path="/contact-us" element={<ContactUsPage/>}/>
-        <Route path="/reset-pass" element={<ResetPasswordPage/>}/>
+        <Route path="/reset-password/:token" element={<ResetPasswordPage/>}/>
         <Route path="/join-brpp" element={<JoinBrppPage />} />
         <Route path="/b2b-catalog" element={<B2bCatalogPage />} />
         <Route path="/partner-wallet" element={<PartnerWalletPage />} />

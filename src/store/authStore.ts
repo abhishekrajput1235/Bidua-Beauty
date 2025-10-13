@@ -23,7 +23,8 @@ interface AuthState {
   logout: () => void;
 
   getProfile: () => Promise<{ success: boolean; error?: string }>;
-  updateProfile: (data: { name?: string; phone?: string }) => Promise<{ success: boolean; error?: string }>;
+  updateProfile: (data: { name?: string; phone?: string; role?: string }) => Promise<{ success: boolean; error?: string }>;
+  updateUserRole: (userId: string, role: string) => Promise<{ success: boolean; error?: string }>;
   deleteUser: (userId: string) => Promise<{ success: boolean; error?: string }>;
 
   forgotPassword: (email: string) => Promise<{ success: boolean; resetToken?: string; error?: string }>;
@@ -40,6 +41,7 @@ export const useAuthStore = create<AuthState>()(
       loading: false,
       error: null,
 
+      // ✅ Register
       signup: async (email, phone, password) => {
         try {
           set({ loading: true, error: null });
@@ -54,6 +56,7 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
+      // ✅ Login
       login: async (email, password) => {
         try {
           set({ loading: true, error: null });
@@ -68,10 +71,12 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
+      // ✅ Logout
       logout: () => {
         set({ user: null, token: null, loading: false, error: null });
       },
 
+      // ✅ Get current user profile
       getProfile: async () => {
         try {
           const token = get().token;
@@ -91,6 +96,7 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
+      // ✅ Update profile (includes role — only admin can change)
       updateProfile: async (data) => {
         try {
           const token = get().token;
@@ -100,7 +106,8 @@ export const useAuthStore = create<AuthState>()(
             headers: { Authorization: `Bearer ${token}` },
           });
 
-          set({ user: res.data.user });
+          const { user, token: newToken } = res.data;
+          set({ user, token: newToken });
           return { success: true };
         } catch (err: any) {
           const message = err.response?.data?.message || "Failed to update profile";
@@ -108,12 +115,30 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
+      // ✅ Admin only — update any user’s role
+      updateUserRole: async (userId, role) => {
+        try {
+          const token = get().token;
+          if (!token) return { success: false, error: "No token" };
+
+          const res = await axios.put(`${API_URL}/users/${userId}/role`, { role }, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+          return { success: true };
+        } catch (err: any) {
+          const message = err.response?.data?.message || "Failed to update user role";
+          return { success: false, error: message };
+        }
+      },
+
+      // ✅ Delete user
       deleteUser: async (userId) => {
         try {
           const token = get().token;
           if (!token) return { success: false, error: "No token" };
 
-          await axios.delete(`${API_URL}/users/${userId}`, {
+          await axios.delete(`${API_URL}/${userId}`, {
             headers: { Authorization: `Bearer ${token}` },
           });
 
@@ -128,6 +153,7 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
+      // ✅ Forgot password
       forgotPassword: async (email) => {
         try {
           const res = await axios.post(`${API_URL}/forgot-password`, { email });
@@ -138,6 +164,7 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
+      // ✅ Reset password
       resetPassword: async (token, newPassword) => {
         try {
           await axios.post(`${API_URL}/reset-password/${token}`, { newPassword });
@@ -148,12 +175,13 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
+      // ✅ Get all users (admin only)
       getAllUsers: async () => {
         try {
           const token = get().token;
           if (!token) return { success: false, error: "No token" };
 
-          const res = await axios.get(`${API_URL}/users`, {
+          const res = await axios.get(`${API_URL}/get-users`, {
             headers: { Authorization: `Bearer ${token}` },
           });
 
@@ -171,3 +199,4 @@ export const useAuthStore = create<AuthState>()(
     }
   )
 );
+

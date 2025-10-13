@@ -3,66 +3,56 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, User, Mail } from "lucide-react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useAuthStore } from "@/store/authStore";
 
 const ForgotPasswordPage = () => {
   const [emailOrPhone, setEmailOrPhone] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const { loading, forgotPassword } = useAuthStore();
 
   // ✅ Email & Phone Validation
   const validateEmailOrPhone = (value: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneRegex = /^[0-9]{10}$/; // simple 10-digit check
+    const phoneRegex = /^[0-9]{10}$/;
     return emailRegex.test(value) || phoneRegex.test(value);
   };
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
 
-    // Client-side validation
     if (!validateEmailOrPhone(emailOrPhone)) {
-      setError("Please enter a valid email or 10-digit mobile number.");
+      toast.error("Enter a valid email or 10-digit phone number");
       return;
     }
 
     try {
-      setLoading(true);
-      // TODO: Call your API for password reset
-      // await forgotPasswordAPI(emailOrPhone);
-
-      toast.success("Password reset link sent! Check your email or SMS.");
-      setEmailOrPhone("");
-    } catch (err: any) {
-      setError(err?.message || "Failed to send reset link. Try again.");
-    } finally {
-      setLoading(false);
+      const res = await forgotPassword(emailOrPhone);
+      if (res.success) {
+        toast.success("Reset token sent! Check your email.");
+      } else {
+        toast.error(res.error || "Failed to send reset token");
+      }
+    } catch (err) {
+      toast.error("Something went wrong. Try again!");
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center px-4 py-8 sm:py-16 relative overflow-hidden">
-      {/* Background Effects */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute top-1/4 left-1/4 w-64 h-64 sm:w-96 sm:h-96 bg-amber-400/10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-1/4 right-1/4 w-48 h-48 sm:w-72 sm:h-72 bg-white/5 rounded-full blur-3xl"></div>
       </div>
 
       <div className="relative z-10 w-full max-w-sm sm:max-w-md">
-        {/* Back to Home */}
         <Link
           to="/"
           className="inline-flex items-center space-x-2 text-amber-400 hover:text-amber-300 transition-colors duration-300 mb-6 sm:mb-8 group text-sm sm:text-base"
         >
-          <ArrowLeft
-            size={18}
-            className="group-hover:-translate-x-1 transition-transform duration-300"
-          />
+          <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform duration-300" />
           <span>Back to Home</span>
         </Link>
 
         <div className="bg-gradient-to-br from-gray-800/50 to-black/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-2xl">
-          {/* Header */}
           <div className="text-center mb-6 sm:mb-8">
             <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
               <Mail className="w-6 h-6 sm:w-8 sm:h-8 text-black" />
@@ -75,14 +65,6 @@ const ForgotPasswordPage = () => {
             </p>
           </div>
 
-          {/* ❌ Error Box Above Form */}
-          {error && (
-            <div className="mb-4 sm:mb-6 bg-red-500/20 border border-red-500/30 rounded-lg p-2.5 sm:p-3 text-red-300 text-xs sm:text-sm text-center">
-              {error}
-            </div>
-          )}
-
-          {/* Forgot Password Form */}
           <form onSubmit={handleForgotPassword} className="space-y-4 sm:space-y-6">
             <div>
               <label className="block text-gray-300 font-medium mb-1 sm:mb-2 text-sm">
@@ -110,7 +92,6 @@ const ForgotPasswordPage = () => {
             </button>
           </form>
 
-          {/* Login Link */}
           <div className="mt-5 sm:mt-6 text-center">
             <p className="text-gray-400 text-xs sm:text-sm">
               Remembered your password?{" "}
