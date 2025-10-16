@@ -1,10 +1,13 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import axios from "axios";
+import { JSX } from "react/jsx-runtime";
 
 const API_URL = "http://localhost:5000/api/v1";
 
 interface User {
+  [x: string]: any;
+  map(arg0: (user: any) => JSX.Element): import("react").ReactNode | Iterable<import("react").ReactNode>;
   id: string;
   email: string;
   phone?: string;
@@ -21,15 +24,12 @@ interface AuthState {
   signup: (email: string, phone: string, password: string) => Promise<{ success: boolean; error?: string }>;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
-
   getProfile: () => Promise<{ success: boolean; error?: string }>;
   updateProfile: (data: { name?: string; phone?: string; role?: string }) => Promise<{ success: boolean; error?: string }>;
   updateUserRole: (userId: string, role: string) => Promise<{ success: boolean; error?: string }>;
   deleteUser: (userId: string) => Promise<{ success: boolean; error?: string }>;
-
   forgotPassword: (email: string) => Promise<{ success: boolean; resetToken?: string; error?: string }>;
   resetPassword: (token: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
-
   getAllUsers: () => Promise<{ success: boolean; users?: User[]; error?: string }>;
 }
 
@@ -41,7 +41,7 @@ export const useAuthStore = create<AuthState>()(
       loading: false,
       error: null,
 
-      // ✅ Register
+      // ✅ Signup
       signup: async (email, phone, password) => {
         try {
           set({ loading: true, error: null });
@@ -96,7 +96,7 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      // ✅ Update profile (includes role — only admin can change)
+      // ✅ Update profile
       updateProfile: async (data) => {
         try {
           const token = get().token;
@@ -107,7 +107,7 @@ export const useAuthStore = create<AuthState>()(
           });
 
           const { user, token: newToken } = res.data;
-          set({ user, token: newToken });
+          set({ user, token: newToken || get().token }); // Keep old token if backend doesn't return a new one
           return { success: true };
         } catch (err: any) {
           const message = err.response?.data?.message || "Failed to update profile";
@@ -115,13 +115,13 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      // ✅ Admin only — update any user’s role
+      // ✅ Admin only — update any user role
       updateUserRole: async (userId, role) => {
         try {
           const token = get().token;
           if (!token) return { success: false, error: "No token" };
 
-          const res = await axios.put(`${API_URL}/users/${userId}/role`, { role }, {
+          await axios.put(`${API_URL}/users/${userId}/role`, { role }, {
             headers: { Authorization: `Bearer ${token}` },
           });
 
@@ -138,14 +138,11 @@ export const useAuthStore = create<AuthState>()(
           const token = get().token;
           if (!token) return { success: false, error: "No token" };
 
-          await axios.delete(`${API_URL}/${userId}`, {
+          await axios.delete(`${API_URL}/users/${userId}`, {
             headers: { Authorization: `Bearer ${token}` },
           });
 
-          if (get().user?.id === userId) {
-            set({ user: null, token: null });
-          }
-
+          if (get().user?.id === userId) set({ user: null, token: null });
           return { success: true };
         } catch (err: any) {
           const message = err.response?.data?.message || "Failed to delete user";
@@ -175,7 +172,7 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      // ✅ Get all users (admin only)
+      // ✅ Get all users
       getAllUsers: async () => {
         try {
           const token = get().token;
@@ -199,4 +196,3 @@ export const useAuthStore = create<AuthState>()(
     }
   )
 );
-

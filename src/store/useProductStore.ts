@@ -1,10 +1,9 @@
+
 import { create } from "zustand";
 import axios from "axios";
 
 // const API_URL = "https://backend.biduabeauty.com/api/v1/products";
 const API_URL = "http://localhost:5000/api/v1/products";
-
-// adjust if needed
 
 interface Unit {
   serial: string;
@@ -19,22 +18,21 @@ interface Rating {
 }
 
 export interface Product {
-  minOrderQty: ReactI18NextChildren | Iterable<ReactI18NextChildren>;
-  id: any;
-  mrp: any;
-  image: any;
+  sku: string;
   _id: string;
   productId: string;
   name: string;
   description: string;
   price: number;
-  b2bPrice?: number;
   sellingPrice?: number;
+  b2bPrice?: number;
   discountPercentage?: number;
   category?: string;
   brand?: string;
   stock: number;
-  images?: string[];
+  images?: {
+    [x: string]: any; url: string; alt?: string 
+}[];
   isFeatured?: boolean;
   tags?: string[];
   units: Unit[];
@@ -59,12 +57,16 @@ interface ProductStore {
 
   fetchProducts: () => Promise<void>;
   fetchProductById: (id: string) => Promise<void>;
-  addProduct: (data: Partial<Product>, token: string) => Promise<void>;
-  updateProduct: (id: string, data: Partial<Product>, token: string) => Promise<void>;
+  addProduct: (data: FormData, token: string) => Promise<any>;
+  updateProduct: (id: string, data: FormData, token: string) => Promise<any>;
   deleteProduct: (id: string, token: string) => Promise<void>;
-  rateProduct: (id: string, rating: number, comment: string, token: string) => Promise<void>;
+  rateProduct: (
+    id: string,
+    rating: number,
+    comment: string,
+    token: string
+  ) => Promise<void>;
 
-  // Cart
   addToCart: (productId: string, quantity: number) => void;
   removeFromCart: (productId: string) => void;
   clearCart: () => void;
@@ -77,65 +79,131 @@ export const useProductStore = create<ProductStore>((set, get) => ({
   loading: false,
   error: null,
 
+  // 📦 Fetch all products
   fetchProducts: async () => {
     set({ loading: true, error: null });
     try {
       const { data } = await axios.get(`${API_URL}`);
       set({ products: data.products, loading: false });
     } catch (err: any) {
-      set({ error: err.response?.data?.message || "Failed to fetch products", loading: false });
+      const msg = err.response?.data?.message || "Failed to fetch products";
+      set({ error: msg, loading: false });
+      throw new Error(msg);
     }
   },
 
+  // 📦 Fetch single product
   fetchProductById: async (id) => {
     set({ loading: true, error: null });
     try {
       const { data } = await axios.get(`${API_URL}/${id}`);
       set({ selectedProduct: data.product, loading: false });
     } catch (err: any) {
-      set({ error: err.response?.data?.message || "Failed to fetch product", loading: false });
+      const msg = err.response?.data?.message || "Failed to fetch product";
+      set({ error: msg, loading: false });
+      throw new Error(msg);
     }
   },
 
-  addProduct: async (productData, token) => {
+  // 🆕 Add Product
+  addProduct: async (formData, token) => {
     set({ loading: true, error: null });
     try {
-      const { data } = await axios.post(`${API_URL}`, productData, {
-        headers: { Authorization: `Bearer ${token}` },
+      const { data } = await axios.post(`${API_URL}`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
       });
-      set({ products: [...get().products, data.product], loading: false });
+      set({
+        products: [...get().products, data.product],
+        loading: false,
+      });
+      return data;
     } catch (err: any) {
-      set({ error: err.response?.data?.message || "Failed to add product", loading: false });
+      const msg = err.response?.data?.message || "Failed to add product";
+      set({ error: msg, loading: false });
+      throw new Error(msg);
     }
   },
 
-  updateProduct: async (id, productData, token) => {
+  // ✏️ Update Product (Handles Multer & backend errors)
+  updateProduct: async (id, formData, token) => {
     set({ loading: true, error: null });
     try {
-      const { data } = await axios.put(`${API_URL}/${id}`, productData, {
-        headers: { Authorization: `Bearer ${token}` },
+      const { data } = await axios.put(`${API_URL}/${id}`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
       });
+
       set({
         products: get().products.map((p) => (p._id === id ? data.product : p)),
         loading: false,
       });
+      return data; // ✅ return full response for frontend toast
     } catch (err: any) {
-      set({ error: err.response?.data?.message || "Failed to update product", loading: false });
+      const msg =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to update product";
+      set({ error: msg, loading: false });
+      throw new Error(msg); // ✅ rethrow so frontend toast can catch
     }
   },
 
+// ➕ Add Stock
+  addStock: async (productId: string, additionalStock: number, token: string) => {
+    set({ loading: true, error: null });
+    try {
+      // Send request to backend
+      const { data } = await axios.post(
+        `${API_URL}/${productId}/add-stock`,
+        { additionalStock },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      // Backend should return updated product
+      const updatedProduct: Product = data.product;
+
+      // Update local product list
+      set({
+        products: get().products.map((p) =>
+          p._id === updatedProduct._id ? updatedProduct : p
+        ),
+        loading: false,
+      });
+
+      return updatedProduct; // can be used for UI updates
+    } catch (err: any) {
+      const msg = err.response?.data?.message || "Failed to add stock";
+      set({ error: msg, loading: false });
+      throw new Error(msg);
+    }
+  },
+
+  // 🗑️ Delete Product
   deleteProduct: async (id, token) => {
     set({ loading: true, error: null });
     try {
       await axios.delete(`${API_URL}/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      set({ products: get().products.filter((p) => p._id !== id), loading: false });
+      set({
+        products: get().products.filter((p) => p._id !== id),
+        loading: false,
+      });
     } catch (err: any) {
-      set({ error: err.response?.data?.message || "Failed to delete product", loading: false });
+      const msg = err.response?.data?.message || "Failed to delete product";
+      set({ error: msg, loading: false });
+      throw new Error(msg);
     }
   },
 
+  // ⭐ Rate Product
   rateProduct: async (id, rating, comment, token) => {
     set({ loading: true, error: null });
     try {
@@ -150,7 +218,9 @@ export const useProductStore = create<ProductStore>((set, get) => ({
         loading: false,
       });
     } catch (err: any) {
-      set({ error: err.response?.data?.message || "Failed to rate product", loading: false });
+      const msg = err.response?.data?.message || "Failed to rate product";
+      set({ error: msg, loading: false });
+      throw new Error(msg);
     }
   },
 
@@ -163,19 +233,16 @@ export const useProductStore = create<ProductStore>((set, get) => ({
       return;
     }
 
-    // Find available (unsold) units
     const availableUnits = product.units.filter((u) => !u.isSold);
     if (availableUnits.length < quantity) {
       set({ error: "Not enough stock available" });
       return;
     }
 
-    // Allocate units
     const allocated = availableUnits.slice(0, quantity).map((u) => u.serial);
-
-    // If product already in cart → update quantity
     const existing = cart.find((c) => c.product._id === productId);
     let newCart;
+
     if (existing) {
       existing.quantity += quantity;
       existing.serialNumbers.push(...allocated);
@@ -195,4 +262,5 @@ export const useProductStore = create<ProductStore>((set, get) => ({
   clearCart: () => {
     set({ cart: [] });
   },
+
 }));

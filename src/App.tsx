@@ -1,5 +1,9 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+// 🌐 Main Website Imports
 import Header from "./components/Header";
 import Hero from "./components/Hero";
 import Benefits from "./components/Benefits";
@@ -19,7 +23,6 @@ import B2bCatalogPage from "./pages/B2bCatalogPage";
 import PartnerWalletPage from "./pages/PartnerWalletPage";
 import UserProfilePage from "./pages/UserProfilePage";
 import QueueTrackerPage from "./pages/QueueTrackerPage";
-import { ToastContainer } from "react-toastify";
 import ProductsPage from "./pages/ProductsPage";
 import ProductDetailsPage from "./pages/ProductDetailsPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
@@ -28,22 +31,26 @@ import ReturnAndShippingPolicyPage from "./pages/ReturnAndShippingPolicyPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import ContactUsPage from "./pages/ContactUsPage";
+import ProtectedAdminRoute from "./components/auth/ProtectedAdminRoute";
+
+// 🧠 Admin Imports
+import { ThemeProvider } from "./admincontexts/ThemeContext";
+import AdminLayout from "./layout/AdminLayout";
+import Dashboard from "./pages/admin/Dashboard";
+import Orders from "./pages/admin/Orders";
+import Products from "./pages/admin/Products";
+import Customers from "./pages/admin/Customers";
+import Analytics from "./pages/admin/Analytics";
+import Settings from "./pages/admin/Settings";
+
 function App() {
   return (
     <div className="min-h-screen">
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="colored" // "light" | "dark" | "colored"
-      />
+      {/* ✅ Toasts */}
+      <ToastContainer position="top-right" autoClose={3000} theme="colored" />
+
       <Routes>
+        {/* 🌐 MAIN WEBSITE ROUTES */}
         <Route
           path="/"
           element={
@@ -65,19 +72,44 @@ function App() {
         <Route path="/confirmation" element={<ConfirmationPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
-        <Route path="/forgot-pass" element={<ForgotPasswordPage/>} />
-        <Route path="/contact-us" element={<ContactUsPage/>}/>
-        <Route path="/reset-password/:token" element={<ResetPasswordPage/>}/>
+        <Route path="/forgot-pass" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+        <Route path="/contact-us" element={<ContactUsPage />} />
         <Route path="/join-brpp" element={<JoinBrppPage />} />
         <Route path="/b2b-catalog" element={<B2bCatalogPage />} />
         <Route path="/partner-wallet" element={<PartnerWalletPage />} />
         <Route path="/user-profile" element={<UserProfilePage />} />
         <Route path="/queue-tracker" element={<QueueTrackerPage />} />
-         <Route path="/products" element={<ProductsPage />} />
+        <Route path="/products" element={<ProductsPage />} />
         <Route path="/products/:id" element={<ProductDetailsPage />} />
-        <Route path="/privacy-policy" element={<PrivacyPolicyPage/>} />
-        <Route path="/terms-and-condition" element={<TermsAndConditionsPage/>}/>
-        <Route path="/return-policy" element={<ReturnAndShippingPolicyPage/>} />
+        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+        <Route
+          path="/terms-and-condition"
+          element={<TermsAndConditionsPage />}
+        />
+        <Route
+          path="/return-policy"
+          element={<ReturnAndShippingPolicyPage />}
+        />
+
+        {/* 🧠 ADMIN DASHBOARD ROUTES */}
+        <Route
+          path="/admin/*"
+          element={
+            <ProtectedAdminRoute>
+              <ThemeProvider>
+                <AdminLayout />
+              </ThemeProvider>
+            </ProtectedAdminRoute>
+          }
+        >
+          <Route index element={<Dashboard />} />
+          <Route path="orders" element={<Orders />} />
+          <Route path="products" element={<Products />} />
+          <Route path="customers" element={<Customers />} />
+          <Route path="analytics" element={<Analytics />} />
+          <Route path="settings" element={<Settings />} />
+        </Route>
       </Routes>
     </div>
   );

@@ -88,9 +88,10 @@ export const useCartStore = create<CartState>((set, get) => ({
       set({ loading: true, error: null });
 
       const token = useAuthStore.getState().token;
+      console.log("Adding to cart", { productId, quantity, token });
 
       const res = await axios.post(
-        `${API_URL}/`,
+        `${API_URL}/add`,
         { productId, quantity },
         { headers: { Authorization: `Bearer ${token}` } }
       );

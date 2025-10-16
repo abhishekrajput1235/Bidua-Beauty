@@ -128,20 +128,18 @@ const UserProfilePage = () => {
               </span>
               <span className="ml-0 sm:ml-2">{user.phone || "N/A"}</span>
             </p>
-           
-          
-
-              <p className="flex flex-col sm:flex-row sm:items-center">
-                <span className="flex items-center mb-1 sm:mb-0">
-                  <Briefcase className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-gray-400" />
-                  <span className="font-medium text-white">Role:</span>
-                </span>
+            <p className="flex flex-col sm:flex-row sm:items-center">
+              <span className="flex items-center mb-1 sm:mb-0">
+                <Briefcase className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-gray-400" />
+                <span className="font-medium text-white">Role:</span>
                 <span
                   className={`ml-0 sm:ml-2 px-2 py-1 rounded-full text-xs sm:text-sm font-bold ${
                     user.role === "user"
                       ? "bg-green-500/20 text-green-400"
                       : user.role === "b2b"
                       ? "bg-blue-500/20 text-blue-400"
+                      : user.role === "admin"
+                      ? "bg-red-500/20 text-red-400"
                       : "bg-gray-500/20 text-gray-400"
                   }`}
                 >
@@ -149,62 +147,90 @@ const UserProfilePage = () => {
                     ? "User"
                     : user.role === "b2b"
                     ? "B2B User"
+                    : user.role === "admin"
+                    ? "Admin"
                     : "Unknown"}
                 </span>
-              </p>
-            
+              </span>
+            </p>
           </div>
         </div>
 
         {/* Quick Actions */}
+ 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
-          {[
-            {
-              to: "/partner-wallet",
-              icon: (
-                <DollarSign className="w-8 h-8 sm:w-10 sm:h-10 text-amber-400 mb-2 sm:mb-4" />
-              ),
-              title: "My Wallet",
-              desc: "View your earnings and transactions",
-            },
-            {
-              to: "/b2b-catalog",
-              icon: (
-                <ShoppingBag className="w-8 h-8 sm:w-10 sm:h-10 text-white mb-2 sm:mb-4" />
-              ),
-              title: "B2B Orders",
-              desc: "Place new B2B orders",
-            },
-            {
-              to: "/queue-tracker",
-              icon: (
-                <ListOrdered className="w-8 h-8 sm:w-10 sm:h-10 text-white mb-2 sm:mb-4" />
-              ),
-              title: "My Queue",
-              desc: "Track your queued orders",
-            },
-            {
-              to: "/join-brpp",
-              icon: (
-                <Briefcase className="w-8 h-8 sm:w-10 sm:h-10 text-white mb-2 sm:mb-4" />
-              ),
-              title: "BRPP Program",
-              desc: "Join or manage BRPP membership",
-            },
-          ].map((item, idx) => (
-            <Link
-              key={idx}
-              to={item.to}
-              className="bg-gradient-to-br from-gray-800/50 to-black/50 backdrop-blur-sm border border-gray-700/50 rounded-3xl p-4 sm:p-6 text-center flex flex-col items-center justify-center hover:shadow-2xl hover:shadow-amber-400/30 transition-all duration-300 transform hover:scale-105"
-            >
-              {item.icon}
-              <h3 className="text-lg sm:text-xl font-bold text-white">
-                {item.title}
-              </h3>
-              <p className="text-gray-300 text-xs sm:text-sm">{item.desc}</p>
-            </Link>
-          ))}
-        </div>
+  {[
+    {
+      to: "/partner-wallet",
+      icon: (
+        <DollarSign className="w-8 h-8 sm:w-10 sm:h-10 text-amber-400 mb-2 sm:mb-4" />
+      ),
+      title: "My Wallet",
+      desc: "View your earnings and transactions",
+    },
+    {
+      to: "/b2b-catalog",
+      icon: (
+        <ShoppingBag className="w-8 h-8 sm:w-10 sm:h-10 text-white mb-2 sm:mb-4" />
+      ),
+      title: "B2B Orders",
+      desc: "Place new B2B orders",
+    },
+    {
+      to: "/queue-tracker",
+      icon: (
+        <ListOrdered className="w-8 h-8 sm:w-10 sm:h-10 text-white mb-2 sm:mb-4" />
+      ),
+      title: "My Queue",
+      desc: "Track your queued orders",
+    },
+    {
+      to: "/join-brpp",
+      icon: (
+        <Briefcase className="w-8 h-8 sm:w-10 sm:h-10 text-white mb-2 sm:mb-4" />
+      ),
+      title: "BRPP Program",
+      desc: "Join or manage BRPP membership",
+    },
+    ...(user.role === "admin"
+      ? [
+          {
+            to: "/admin",
+            icon: (
+              <Briefcase className="w-8 h-8 sm:w-10 sm:h-10 text-red-400 mb-2 sm:mb-4" />
+            ),
+            title: "Go to Admin Dashboard",
+            desc: "Manage products, orders, customers and analytics",
+            newTab: true, // flag to open in new tab
+          },
+        ]
+      : []),
+  ].map((item, idx) => {
+    const commonClasses =
+      "bg-gradient-to-br from-gray-800/50 to-black/50 backdrop-blur-sm border border-gray-700/50 rounded-3xl p-4 sm:p-6 text-center flex flex-col items-center justify-center hover:shadow-2xl hover:shadow-amber-400/30 transition-all duration-300 transform hover:scale-105";
+
+    return item.newTab ? (
+      <a
+        key={idx}
+        href={item.to}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={commonClasses}
+      >
+        {item.icon}
+        <h3 className="text-lg sm:text-xl font-bold text-white">{item.title}</h3>
+        <p className="text-gray-300 text-xs sm:text-sm">{item.desc}</p>
+      </a>
+    ) : (
+      <Link key={idx} to={item.to} className={commonClasses}>
+        {item.icon}
+        <h3 className="text-lg sm:text-xl font-bold text-white">{item.title}</h3>
+        <p className="text-gray-300 text-xs sm:text-sm">{item.desc}</p>
+      </Link>
+    );
+  })}
+</div>
+
 
         {/* Logout */}
         <div className="text-center">

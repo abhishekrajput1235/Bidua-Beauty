@@ -1,151 +1,136 @@
 import { create } from "zustand";
 import axios from "axios";
+import { useAuthStore } from "./authStore"; // ✅ Import your auth store
+
+const API_URL = "http://localhost:5000/api/v1";
 
 interface BusinessProfile {
   _id?: string;
+  user?: string;
   businessName: string;
   ownerName: string;
   phone: string;
   email: string;
   address: string;
-  gstNumber?: string | null;
-  createdAt?: string;
-  updatedAt?: string;
+  gstNumber?: string;
+  subscriptionStatus?: string;
+  subscriptionStartDate?: string;
+  subscriptionEndDate?: string;
 }
 
-interface BusinessProfileState {
+interface BusinessProfileStore {
+  profile: BusinessProfile | null;
   profiles: BusinessProfile[];
-  currentProfile: BusinessProfile | null;
   loading: boolean;
   error: string | null;
-  message: string | null;
+  success: boolean;
 
-  createProfile: (formData: Omit<BusinessProfile, "_id">, token: string) => Promise<void>;
-  fetchProfiles: (token: string) => Promise<void>;
-  fetchProfileById: (id: string, token: string) => Promise<void>;
-  updateProfile: (id: string, formData: Partial<BusinessProfile>, token: string) => Promise<void>;
-  deleteProfile: (id: string, token: string) => Promise<void>;
+  createProfile: (data: BusinessProfile) => Promise<boolean>;
+  fetchMyProfile: () => Promise<void>;
+  fetchProfileById: (id: string) => Promise<void>;
+  updateProfile: (id: string, data: Partial<BusinessProfile>) => Promise<boolean>;
+  deleteProfile: (id: string) => Promise<boolean>;
   clearMessages: () => void;
 }
 
-export const useBusinessProfileStore = create<BusinessProfileState>((set) => ({
+export const useBusinessProfileStore = create<BusinessProfileStore>((set, get) => ({
+  profile: null,
   profiles: [],
-  currentProfile: null,
   loading: false,
   error: null,
-  message: null,
+  success: false,
 
-  // ✅ Create business profile (auto-upgrades user to B2B via backend)
-  createProfile: async (formData, token) => {
-    set({ loading: true, error: null, message: null });
+  /** ✅ Create new business profile */
+  createProfile: async (data) => {
     try {
-      const { data } = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/business-profile`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      set({ loading: true, error: null, success: false });
+      const token = useAuthStore.getState().token;
+      if (!token) throw new Error("User not authenticated");
 
-      set({
-        loading: false,
-        message: data.message || "Business profile created successfully.",
-        currentProfile: data.data,
+      const res = await axios.post(`${API_URL}/business-profile`, data, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-    } catch (error: any) {
-      set({
-        loading: false,
-        error: error.response?.data?.message || "Failed to create profile.",
-      });
+
+      set({ profile: res.data.data, loading: false, success: true });
+      return true;
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || err.message || "Failed to create profile", loading: false });
+      return false;
     }
   },
 
-  // ✅ Fetch all profiles (admin use)
-  fetchProfiles: async (token) => {
-    set({ loading: true, error: null });
+  /** ✅ Fetch current user's profile */
+  fetchMyProfile: async () => {
     try {
-      const { data } = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/business-profile`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      set({ loading: false, profiles: data.data });
-    } catch (error: any) {
-      set({
-        loading: false,
-        error: error.response?.data?.message || "Failed to fetch profiles.",
+      set({ loading: true, error: null });
+      const token = useAuthStore.getState().token;
+      if (!token) throw new Error("User not authenticated");
+
+      const res = await axios.get(`${API_URL}/my-business-profile`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
+
+      set({ profile: res.data.data, loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || err.message || "Failed to fetch profile", loading: false });
     }
   },
 
-  // ✅ Fetch single profile
-  fetchProfileById: async (id, token) => {
-    set({ loading: true, error: null });
+  /** ✅ Fetch profile by ID */
+  fetchProfileById: async (id) => {
     try {
-      const { data } = await axios.get(
-        `${import.meta.env.VITE_API_URL}/api/business-profile/${id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      set({ loading: false, currentProfile: data.data });
-    } catch (error: any) {
-      set({
-        loading: false,
-        error: error.response?.data?.message || "Failed to fetch profile.",
+      set({ loading: true, error: null });
+      const token = useAuthStore.getState().token;
+      if (!token) throw new Error("User not authenticated");
+
+      const res = await axios.get(`${API_URL}/business-profile/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
+
+      set({ profile: res.data.data, loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || err.message || "Failed to fetch profile by ID", loading: false });
     }
   },
 
-  // ✅ Update business profile
-  updateProfile: async (id, formData, token) => {
-    set({ loading: true, error: null });
+  /** ✅ Update profile */
+  updateProfile: async (id, data) => {
     try {
-      const { data } = await axios.put(
-        `${import.meta.env.VITE_API_URL}/api/business-profile/${id}`,
-        formData,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      set({ loading: true, error: null });
+      const token = useAuthStore.getState().token;
+      if (!token) throw new Error("User not authenticated");
 
-      set({
-        loading: false,
-        message: data.message || "Business profile updated successfully.",
-        currentProfile: data.data,
+      const res = await axios.put(`${API_URL}/business-profile/${id}`, data, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-    } catch (error: any) {
-      set({
-        loading: false,
-        error: error.response?.data?.message || "Failed to update profile.",
-      });
+
+      set({ profile: res.data.data, success: true, loading: false });
+      return true;
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || err.message || "Failed to update profile", loading: false });
+      return false;
     }
   },
 
-  // ✅ Delete business profile
-  deleteProfile: async (id, token) => {
-    set({ loading: true, error: null });
+  /** ✅ Delete profile */
+  deleteProfile: async (id) => {
     try {
-      const { data } = await axios.delete(
-        `${import.meta.env.VITE_API_URL}/api/business-profile/${id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      set({
-        loading: false,
-        message: data.message || "Business profile deleted successfully.",
+      set({ loading: true, error: null });
+      const token = useAuthStore.getState().token;
+      if (!token) throw new Error("User not authenticated");
+
+      await axios.delete(`${API_URL}/business-profile/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-    } catch (error: any) {
-      set({
-        loading: false,
-        error: error.response?.data?.message || "Failed to delete profile.",
-      });
+
+      set({ profile: null, success: true, loading: false });
+      return true;
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || err.message || "Failed to delete profile", loading: false });
+      return false;
     }
   },
 
-  clearMessages: () => set({ error: null, message: null }),
+  /** ✅ Clear error & success messages */
+  clearMessages: () => set({ error: null, success: false }),
 }));

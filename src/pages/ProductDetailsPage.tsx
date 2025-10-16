@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, ShoppingCart } from "lucide-react";
 import { useCartStore } from "../store/cartStore";
 import { useProductStore } from "../store/useProductStore";
+import { toast } from "react-toastify";
 
 const ProductDetailsPage = () => {
   const { id } = useParams();
@@ -12,6 +13,12 @@ const ProductDetailsPage = () => {
   useEffect(() => {
     if (id) fetchProductById(id);
   }, [id, fetchProductById]);
+
+  const handleAddToCart = async () => {
+  await addToCart(selectedProduct.productId || selectedProduct._id, 1);
+  toast.success("Item added to cart!");
+};
+
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("en-IN", {
@@ -88,7 +95,7 @@ const ProductDetailsPage = () => {
             </div>
 
             <button
-              onClick={() => addToCart(selectedProduct._id, 1)}
+              onClick={handleAddToCart}
               className="bg-gradient-to-r from-amber-400 to-yellow-500 text-black px-8 py-3 rounded-xl 
                          text-lg font-bold hover:shadow-amber-400/30 hover:shadow-xl 
                          transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2"
