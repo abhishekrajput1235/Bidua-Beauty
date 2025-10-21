@@ -57,8 +57,12 @@ const ConfirmationPage = () => {
       - ${address}
 
       Items:
-      ${order.items.map(item => `- ${item.product ? item.product.name : 'Product not available'} (x ${item.quantity}) - ${formatPrice(item.price)}`).join('\n')}
+      ${order.items.map(item => `- ${item.product ? item.product.name : 'Product not available'} (x ${item.quantity}) - ${formatPrice(item.price * item.quantity)}`).join('\n')}
 
+      Subtotal: ${formatPrice(order.subTotal)}
+      Shipping: ${formatPrice(order.shippingCharges)}
+      GST: ${formatPrice(order.gstAmount)}
+      ------------------------------
       Total: ${formatPrice(order.totalAmount)}
       Payment: ${order.payment.method} - ${order.payment.status}
       ==============================
@@ -193,9 +197,23 @@ const ConfirmationPage = () => {
               </div>
             ))}
           </div>
-          <div className="border-t border-gray-700 mt-4 pt-4 flex justify-between text-white font-bold text-lg">
-            <p>Total Amount</p>
-            <p className="text-amber-400">{formatPrice(latestOrder.totalAmount)}</p>
+          <div className="border-t border-gray-700 mt-4 pt-4 space-y-2">
+            <div className="flex justify-between text-gray-300">
+              <span>Subtotal</span>
+              <span>{formatPrice(latestOrder.subTotal)}</span>
+            </div>
+            <div className="flex justify-between text-gray-300">
+              <span>Shipping</span>
+              <span>{formatPrice(latestOrder.shippingCharges)}</span>
+            </div>
+            <div className="flex justify-between text-gray-300">
+              <span>GST</span>
+              <span>{formatPrice(latestOrder.gstAmount)}</span>
+            </div>
+            <div className="border-t border-gray-700 pt-2 mt-2 flex justify-between text-white font-bold text-lg">
+              <p>Total Amount</p>
+              <p className="text-amber-400">{formatPrice(latestOrder.totalAmount)}</p>
+            </div>
           </div>
         </div>
 

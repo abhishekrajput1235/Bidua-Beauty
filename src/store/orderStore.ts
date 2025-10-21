@@ -15,6 +15,8 @@ interface OrderItemDetail {
   quantity: number;
   serials: string[];
   price: number;
+  gstAmount: number;
+  shippingCharge: number;
 }
 
 interface User {
@@ -44,6 +46,9 @@ export interface Order {
   _id: string;
   user: User;
   items: OrderItemDetail[];
+  subTotal: number;
+  shippingCharges: number;
+  gstAmount: number;
   totalAmount: number;
   payment: PaymentInfo;
   status: "Processing" | "Shipped" | "Delivered" | "Cancelled";
