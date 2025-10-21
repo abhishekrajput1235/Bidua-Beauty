@@ -178,7 +178,7 @@ const ConfirmationPage = () => {
               <div className="space-y-2 text-gray-300 text-sm sm:text-base">
                 <p><span className="text-white font-medium">{t('confirmation.address')}</span> {shippingAddress.street ? `${shippingAddress.street}, ${shippingAddress.city}, ${shippingAddress.state} ${shippingAddress.postalCode}` : 'Address not provided'}</p>
                 <p><span className="text-white font-medium">{t('confirmation.estimatedDelivery')}</span> {estimatedDelivery}</p>
-                <p><span className="text-white font-medium">{t('confirmation.shipping')}</span> <span className="text-green-400">{t('confirmation.free')}</span></p>
+                <p><span className="text-white font-medium">{t('confirmation.shipping')}</span> <span className="text-green-400">{formatPrice(latestOrder.shippingCharges)}</span></p>
               </div>
             </div>
           </div>

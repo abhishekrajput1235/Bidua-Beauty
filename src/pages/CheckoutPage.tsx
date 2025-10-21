@@ -8,11 +8,146 @@ import { useAuthStore } from "@/store/authStore";
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const paymentMethods = [
-  { id: "Card", name: "Credit Card", icon: CreditCard },
-  { id: "COD", name: "Cash on Delivery", icon: Truck },
+  { id: "Credit Card", name: "Credit Card", icon: CreditCard },
+  { id: "Debit Card", name: "Debit Card", icon: CreditCard },
+  { id: "Net Banking", name: "Net Banking", icon: Landmark },
   { id: "UPI", name: "UPI", icon: Landmark },
-  { id: "Wallet", name: "Wallet", icon: Wallet },
+  { id: "COD", name: "Cash on Delivery", icon: Truck },
+  { id: "Other", name: "Other", icon: Wallet },
 ];
+
+const ShippingAddressStep = ({ customerDetails, setCustomerDetails, t, onNext }) => (
+  <div className="space-y-8">
+    <h2 className="text-2xl font-bold text-white mb-4">{t("checkout.customerInformation")}</h2>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {["firstName", "lastName"].map((field) => (
+        <div key={field}>
+          <label className="block text-white font-medium mb-2 capitalize">{t(`checkout.${field}`)}</label>
+          <input
+            type="text"
+            value={customerDetails[field]}
+            onChange={(e) => setCustomerDetails({ ...customerDetails, [field]: e.target.value })}
+            className="w-full bg-black/50 border border-gray-600 rounded-xl py-3 px-4 text-white placeholder-gray-400 focus:outline-none focus:border-amber-400 transition-colors"
+            required
+          />
+        </div>
+      ))}
+    </div>
+    {["email", "phone", "address"].map((field) => (
+      <div key={field}>
+        <label className="block text-white font-medium mb-2 capitalize">{t(`checkout.${field}`)}</label>
+        <input
+          type={field === "email" ? "email" : "text"}
+          value={customerDetails[field]}
+          onChange={(e) => setCustomerDetails({ ...customerDetails, [field]: e.target.value })}
+          className="w-full bg-black/50 border border-gray-600 rounded-xl py-3 px-4 text-white placeholder-gray-400 focus:outline-none focus:border-amber-400 transition-colors"
+          required
+        />
+      </div>
+    ))}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {["city", "state", "pincode"].map((field) => (
+        <div key={field}>
+          <label className="block text-white font-medium mb-2 capitalize">{t(`checkout.${field}`)}</label>
+          <input
+            type="text"
+            value={customerDetails[field]}
+            onChange={(e) => setCustomerDetails({ ...customerDetails, [field]: e.target.value })}
+            className="w-full bg-black/50 border border-gray-600 rounded-xl py-3 px-4 text-white placeholder-gray-400 focus:outline-none focus:border-amber-400 transition-colors"
+            required
+          />
+        </div>
+      ))}
+    </div>
+    <button onClick={onNext} className="w-full bg-gradient-to-r from-amber-400 to-yellow-500 text-black py-4 rounded-2xl font-bold text-lg hover:shadow-2xl hover:shadow-amber-400/30 transition-all duration-300 transform hover:scale-105">
+      Next: Payment
+    </button>
+  </div>
+);
+
+const PaymentStep = ({ customerDetails, setCustomerDetails, paymentDetails, setPaymentDetails, t, onBack, handlePlaceOrder, isProcessing, cartLoading }) => (
+  <div className="space-y-8">
+    <h2 className="text-2xl font-bold text-white mb-4">{t("checkout.paymentMethod")}</h2>
+    <div className="grid grid-cols-2 gap-4">
+      {paymentMethods.map((method) => (
+        <label
+          key={method.id}
+          className={`flex flex-col items-center justify-center space-y-2 p-4 rounded-2xl border-2 transition-all duration-300 cursor-pointer ${
+            customerDetails.paymentMethod === method.id
+              ? "border-amber-400 bg-amber-400/10"
+              : "border-gray-600/50 hover:border-gray-500"
+          }`}
+        >
+          <input
+            type="radio"
+            name="payment"
+            value={method.id}
+            checked={customerDetails.paymentMethod === method.id}
+            onChange={(e) => setCustomerDetails({ ...customerDetails, paymentMethod: e.target.value })}
+            className="sr-only"
+          />
+          <method.icon className={`w-8 h-8 mb-2 ${customerDetails.paymentMethod === method.id ? "text-amber-400" : "text-gray-400"}`} />
+          <span className={`font-medium text-center ${customerDetails.paymentMethod === method.id ? "text-white" : "text-gray-300"}`}>
+            {t(`checkout.${method.id.toLowerCase().replace(/ /g, "")}`)}
+          </span>
+        </label>
+      ))}
+    </div>
+
+    {customerDetails.paymentMethod === "Credit Card" && (
+      <div className="space-y-4">
+        <h3 className="text-xl font-semibold text-white">Card Details</h3>
+        <div>
+          <label className="block text-white font-medium mb-2">Card Number</label>
+          <input type="text" value={paymentDetails.cardNumber} onChange={(e) => setPaymentDetails({...paymentDetails, cardNumber: e.target.value})} className="w-full bg-black/50 border border-gray-600 rounded-xl py-3 px-4 text-white placeholder-gray-400 focus:outline-none focus:border-amber-400 transition-colors" required />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-white font-medium mb-2">Expiry Date</label>
+            <input type="text" value={paymentDetails.expiryDate} onChange={(e) => setPaymentDetails({...paymentDetails, expiryDate: e.target.value})} placeholder="MM/YY" className="w-full bg-black/50 border border-gray-600 rounded-xl py-3 px-4 text-white placeholder-gray-400 focus:outline-none focus:border-amber-400 transition-colors" required />
+          </div>
+          <div>
+            <label className="block text-white font-medium mb-2">CVC</label>
+            <input type="text" value={paymentDetails.cvc} onChange={(e) => setPaymentDetails({...paymentDetails, cvc: e.target.value})} className="w-full bg-black/50 border border-gray-600 rounded-xl py-3 px-4 text-white placeholder-gray-400 focus:outline-none focus:border-amber-400 transition-colors" required />
+          </div>
+        </div>
+      </div>
+    )}
+
+    {customerDetails.paymentMethod === "UPI" && (
+      <div className="space-y-4">
+        <h3 className="text-xl font-semibold text-white">UPI Details</h3>
+        <div>
+          <label className="block text-white font-medium mb-2">UPI ID</label>
+          <input type="text" value={paymentDetails.upiId} onChange={(e) => setPaymentDetails({...paymentDetails, upiId: e.target.value})} placeholder="yourname@bank" className="w-full bg-black/50 border border-gray-600 rounded-xl py-3 px-4 text-white placeholder-gray-400 focus:outline-none focus:border-amber-400 transition-colors" required />
+        </div>
+      </div>
+    )}
+
+    <div className="flex items-center space-x-4">
+        <button onClick={onBack} className="w-full bg-gray-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-gray-700 transition-all duration-300">
+            Back
+        </button>
+        <button
+            onClick={handlePlaceOrder}
+            disabled={isProcessing || cartLoading}
+            className="w-full bg-gradient-to-r from-amber-400 to-yellow-500 text-black py-4 rounded-2xl font-bold text-lg hover:shadow-2xl hover:shadow-amber-400/30 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+            {isProcessing ? (
+            <div className="flex items-center justify-center space-x-3">
+                <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
+                <span>{t("checkout.processingPayment")}</span>
+            </div>
+            ) : (
+            <div className="flex items-center justify-center space-x-3">
+                <Shield className="w-6 h-6" />
+                <span>{t("checkout.placeOrder")}</span>
+            </div>
+            )}
+        </button>
+    </div>
+  </div>
+);
 
 const CheckoutPage: React.FC = () => {
   const { t } = useTranslation();
@@ -22,6 +157,7 @@ const CheckoutPage: React.FC = () => {
   const { user, getProfile, loading: userLoading } = useAuthStore();
 
   const [isProcessing, setIsProcessing] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
 
   const [customerDetails, setCustomerDetails] = useState({
     firstName: "",
@@ -32,16 +168,21 @@ const CheckoutPage: React.FC = () => {
     city: "",
     state: "",
     pincode: "",
-    paymentMethod: "Card",
+    paymentMethod: "Credit Card",
   });
 
-  // Fetch user + cart on mount
+  const [paymentDetails, setPaymentDetails] = useState({
+    cardNumber: "",
+    expiryDate: "",
+    cvc: "",
+    upiId: "",
+  });
+
   useEffect(() => {
     getProfile();
     fetchCart();
   }, [getProfile, fetchCart]);
 
-  // Populate customer details once user is loaded
   useEffect(() => {
     if (user) {
       const fullName = user.name?.split(" ") || [];
@@ -54,7 +195,7 @@ const CheckoutPage: React.FC = () => {
         city: user.address?.[0]?.city || "",
         state: user.address?.[0]?.state || "",
         pincode: user.address?.[0]?.postalCode || "",
-        paymentMethod: "Card",
+        paymentMethod: "Credit Card",
       });
     }
   }, [user]);
@@ -96,13 +237,12 @@ const CheckoutPage: React.FC = () => {
         city: customerDetails.city,
         state: customerDetails.state,
         postalCode: customerDetails.pincode,
-        country: "India", // Assuming country is India
+        country: "India",
       };
       const order = await checkout(shippingAddress, customerDetails.paymentMethod);
       if (order) {
         navigate("/confirmation");
       } else {
-        // Handle checkout failure, maybe show a toast notification
         console.error("Checkout failed");
       }
     } catch (err) {
@@ -159,142 +299,28 @@ const CheckoutPage: React.FC = () => {
         </div>
 
         <div className="grid lg:grid-cols-2 gap-12">
-          {/* Checkout Form */}
-          <div className="space-y-8">
-            <form
-              onSubmit={handlePlaceOrder}
-              className="space-y-8 bg-gradient-to-br from-gray-800/50 to-black/50 backdrop-blur-sm border border-gray-700/50 rounded-3xl p-8"
-            >
-              <h2 className="text-2xl font-bold text-white mb-4">
-                {t("checkout.customerInformation")}
-              </h2>
-
-              {/* Form Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {["firstName", "lastName"].map((field) => (
-                  <div key={field}>
-                    <label className="block text-white font-medium mb-2 capitalize">
-                      {t(`checkout.${field}`)}
-                    </label>
-                    <input
-                      type="text"
-                      value={(customerDetails as any)[field]}
-                      onChange={(e) =>
-                        setCustomerDetails({
-                          ...customerDetails,
-                          [field]: e.target.value,
-                        })
-                      }
-                      className="w-full bg-black/50 border border-gray-600 rounded-xl py-3 px-4 text-white placeholder-gray-400 focus:outline-none focus:border-amber-400 transition-colors"
-                      required
-                    />
-                  </div>
-                ))}
-              </div>
-
-              {["email", "phone", "address"].map((field) => (
-                <div key={field}>
-                  <label className="block text-white font-medium mb-2 capitalize">
-                    {t(`checkout.${field}`)}
-                  </label>
-                  <input
-                    type={field === "email" ? "email" : "text"}
-                    value={(customerDetails as any)[field]}
-                    onChange={(e) =>
-                      setCustomerDetails({
-                        ...customerDetails,
-                        [field]: e.target.value,
-                      })
-                    }
-                    className="w-full bg-black/50 border border-gray-600 rounded-xl py-3 px-4 text-white placeholder-gray-400 focus:outline-none focus:border-amber-400 transition-colors"
-                    required
-                  />
-                </div>
-              ))}
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {["city", "state", "pincode"].map((field) => (
-                  <div key={field}>
-                    <label className="block text-white font-medium mb-2 capitalize">
-                      {t(`checkout.${field}`)}
-                    </label>
-                    <input
-                      type="text"
-                      value={(customerDetails as any)[field]}
-                      onChange={(e) =>
-                        setCustomerDetails({
-                          ...customerDetails,
-                          [field]: e.target.value,
-                        })
-                      }
-                      className="w-full bg-black/50 border border-gray-600 rounded-xl py-3 px-4 text-white placeholder-gray-400 focus:outline-none focus:border-amber-400 transition-colors"
-                      required
-                    />
-                  </div>
-                ))}
-              </div>
-
-              {/* Payment Method */}
-              <h2 className="text-2xl font-bold text-white mb-4">
-                {t("checkout.paymentMethod")}
-              </h2>
-              <div className="space-y-4">
-                {paymentMethods.map((method) => (
-                  <label
-                    key={method.id}
-                    className={`flex items-center space-x-3 p-4 rounded-2xl border transition-all duration-300 cursor-pointer ${
-                      customerDetails.paymentMethod === method.id
-                        ? "bg-amber-400/10 border-amber-400/30"
-                        : "bg-gray-700/30 border-gray-600/50 hover:border-gray-500"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="payment"
-                      value={method.id}
-                      checked={customerDetails.paymentMethod === method.id}
-                      onChange={(e) =>
-                        setCustomerDetails({
-                          ...customerDetails,
-                          paymentMethod: e.target.value,
-                        })
-                      }
-                      className="text-amber-400 focus:ring-amber-400"
-                    />
-                    <method.icon className={`w-6 h-6 ${
-                      customerDetails.paymentMethod === method.id
-                        ? "text-amber-400"
-                        : "text-gray-400"
-                    }`} />
-                    <span className={`font-medium flex-1 ${
-                      customerDetails.paymentMethod === method.id
-                        ? "text-white"
-                        : "text-gray-300"
-                    }`}>
-                      {t(`checkout.${method.id.toLowerCase()}`)}
-                    </span>
-                  </label>
-                ))}
-              </div>
-
-              <button
-                type="submit"
-                disabled={isProcessing || cartLoading}
-                className="w-full bg-gradient-to-r from-amber-400 to-yellow-500 text-black py-4 rounded-2xl font-bold text-lg hover:shadow-2xl hover:shadow-amber-400/30 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isProcessing ? (
-                  <div className="flex items-center justify-center space-x-3">
-                    <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
-                    <span>{t("checkout.processingPayment")}</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center space-x-3">
-                    <Shield className="w-6 h-6" />
-                    <span>{t("checkout.placeOrder")}</span>
-                  </div>
-                )}
-              </button>
-            </form>
+          <div className="space-y-8 bg-gradient-to-br from-gray-800/50 to-black/50 backdrop-blur-sm border border-gray-700/50 rounded-3xl p-8">
+            {currentStep === 1 && (
+              <ShippingAddressStep
+                customerDetails={customerDetails}
+                setCustomerDetails={setCustomerDetails}
+                t={t}
+                onNext={() => setCurrentStep(2)}
+              />
+            )}
+            {currentStep === 2 && (
+              <PaymentStep
+                customerDetails={customerDetails}
+                setCustomerDetails={setCustomerDetails}
+                paymentDetails={paymentDetails}
+                setPaymentDetails={setPaymentDetails}
+                t={t}
+                onBack={() => setCurrentStep(1)}
+                handlePlaceOrder={handlePlaceOrder}
+                isProcessing={isProcessing}
+                cartLoading={cartLoading}
+              />
+            )}
           </div>
 
           {/* Order Summary */}

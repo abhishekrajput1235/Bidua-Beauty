@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -15,9 +15,12 @@ import {
   ArrowRight,
   Crown,
   ShoppingCart,
+  Download,
 } from "lucide-react";
 import { useOrderStore } from "@/store/orderStore";
 import { useAuthStore } from "../store/authStore";
+import html2pdf from 'html2pdf.js';
+import Invoice from '../components/Invoice';
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL || "";
 
@@ -42,6 +45,7 @@ type Order = {
   payment: {
     method?: string;
     status?: string;
+    transactionId?: string;
   };
   shippingAddress?: {
     fullName?: string;
@@ -57,23 +61,38 @@ type Order = {
 const MyOrdersPage: React.FC = () => {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
-  const { userOrders, fetchUserOrders, fetchAllOrders, loading, error } =
-    useOrderStore();
+  const { userOrders, fetchUserOrders, loading, error } = useOrderStore();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [visibleOrders, setVisibleOrders] = useState(5);
+  const [orderToPrint, setOrderToPrint] = useState<Order | null>(null);
+  const invoiceRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!user) {
       navigate("/login");
       return;
     }
-    // fetch user's orders (store should fill userOrders)
     fetchUserOrders(user._id);
   }, [user, navigate, fetchUserOrders]);
 
-  // helpers
+  useEffect(() => {
+    if (orderToPrint && invoiceRef.current) {
+      const opt = {
+        margin: 0.5,
+        filename: `invoice-${orderToPrint._id}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' },
+      };
+      html2pdf().from(invoiceRef.current).set(opt).save().then(() => {
+        setOrderToPrint(null);
+      });
+    }
+  }, [orderToPrint]);
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "Pending":
@@ -108,37 +127,38 @@ const MyOrdersPage: React.FC = () => {
     }
   };
 
-  // Use the store's userOrders (fallback empty arr)
   const orders: Order[] = (userOrders as unknown as Order[]) || [];
 
-  // filter/search logic:
   const filteredOrders = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
-    return orders.filter((order) => {
-      const matchesStatus = statusFilter === "all" || order.status === statusFilter;
-      if (!matchesStatus) return false;
-
-      if (!q) return true;
-
-      // match order id
-      if (order._id.toLowerCase().includes(q)) return true;
-
-      // match product name or serials
-      for (const item of order.items) {
-        if (item.product && item.product.name?.toLowerCase().includes(q)) return true;
-        if (item.serials && item.serials.some((s) => s.toLowerCase().includes(q)))
-          return true;
-      }
-
-      return false;
-    });
+    return orders
+      .slice()
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .filter((order) => {
+        const matchesStatus = statusFilter === "all" || order.status === statusFilter;
+        if (!matchesStatus) return false;
+        if (!q) return true;
+        if (order._id.toLowerCase().includes(q)) return true;
+        for (const item of order.items) {
+          if (item.product && item.product.name?.toLowerCase().includes(q)) return true;
+          if (item.serials && item.serials.some((s) => s.toLowerCase().includes(q)))
+            return true;
+        }
+        return false;
+      });
   }, [orders, searchTerm, statusFilter]);
 
-  // Small formatter
+  const paginatedOrders = useMemo(() => {
+    return filteredOrders.slice(0, visibleOrders);
+  }, [filteredOrders, visibleOrders]);
+
   const formatPrice = (p: number) =>
     new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(p);
 
-  // Empty state
+  const handleDownloadInvoice = (order: Order) => {
+    setOrderToPrint(order);
+  };
+
   if (!loading && orders.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
@@ -175,7 +195,6 @@ const MyOrdersPage: React.FC = () => {
     );
   }
 
-  // Loading / error states
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
@@ -195,6 +214,9 @@ const MyOrdersPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+      <div style={{ position: 'absolute', left: '-9999px' }}>
+        {orderToPrint && <div ref={invoiceRef}><Invoice order={orderToPrint} /></div>}
+      </div>
       <div className="container mx-auto px-4 py-8 max-w-6xl">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Links */}
@@ -359,6 +381,13 @@ const MyOrdersPage: React.FC = () => {
                     <span className="text-xl font-bold text-white">Total Amount</span>
                     <span className="text-2xl font-bold text-amber-500">{formatPrice(selectedOrder.totalAmount)}</span>
                   </div>
+                  <button
+                    onClick={() => handleDownloadInvoice(selectedOrder)}
+                    className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-all duration-300"
+                  >
+                    <Download className="w-5 h-5" />
+                    <span>Download Invoice</span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -367,7 +396,7 @@ const MyOrdersPage: React.FC = () => {
 
         {/* Orders list */}
         <div className="space-y-4">
-          {filteredOrders.map((order) => (
+          {paginatedOrders.map((order) => (
             <div
               key={order._id}
               onClick={() => setSelectedOrder(order)}
@@ -450,6 +479,18 @@ const MyOrdersPage: React.FC = () => {
             </div>
           ))}
         </div>
+
+        {/* Load More Button */}
+        {visibleOrders < filteredOrders.length && (
+          <div className="text-center mt-8">
+            <button
+              onClick={() => setVisibleOrders((prev) => prev + 5)}
+              className="px-8 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-amber-500/50 transition-all duration-300 hover:scale-105"
+            >
+              Load More
+            </button>
+          </div>
+        )}
 
         {filteredOrders.length === 0 && orders.length > 0 && (
           <div className="text-center py-16">
