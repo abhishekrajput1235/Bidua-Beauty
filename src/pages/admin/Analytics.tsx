@@ -1,3 +1,4 @@
+import { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
   AreaChart,
@@ -17,11 +18,94 @@ import {
   Legend
 } from 'recharts';
 import { TrendingUp, DollarSign, Users, ShoppingCart } from 'lucide-react';
-import { salesData, categoryData, userGrowthData } from '../../data/admin/mockData';
+import { useOrderStore } from '@/store/orderStore';
+import { useAuthStore } from '@/store/authStore';
+import { useProductStore } from '@/store/useProductStore';
 
-const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444'];
+const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
 
 export default function Analytics() {
+  const { allOrders, fetchAllOrders } = useOrderStore();
+  const { getAllUsers, user } = useAuthStore();
+  const { products, fetchProducts } = useProductStore();
+  const [usersList, setUsersList] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetchAllOrders();
+    fetchProducts();
+    const fetchUsers = async () => {
+      const { users } = await getAllUsers();
+      if (users) {
+        setUsersList(users);
+      }
+    };
+    if (user?.role === 'admin') {
+      fetchUsers();
+    }
+  }, [fetchAllOrders, fetchProducts, getAllUsers, user]);
+
+  const salesAndOrdersData = useMemo(() => {
+    const dataByMonth = allOrders.reduce((acc, order) => {
+        const month = new Date(order.createdAt).toLocaleString('default', { month: 'short' });
+        if (!acc[month]) {
+            acc[month] = { revenue: 0, orders: 0 };
+        }
+        acc[month].revenue += order.totalAmount;
+        acc[month].orders += 1;
+        return acc;
+    }, {} as Record<string, { revenue: number, orders: number }>);
+
+    const monthOrder = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    
+    return monthOrder.map(month => ({
+      month,
+      revenue: dataByMonth[month]?.revenue || 0,
+      orders: dataByMonth[month]?.orders || 0,
+    })).filter(d => d.revenue > 0 || d.orders > 0);
+  }, [allOrders]);
+
+  const categorySalesData = useMemo(() => {
+    const salesByCategory = allOrders.reduce((acc, order) => {
+        order.items.forEach(item => {
+            const product = products.find(p => p._id === (item.product as any)?._id);
+            if (product && product.category) {
+                const category = product.category;
+                acc[category] = (acc[category] || 0) + (item.price * item.quantity);
+            }
+        });
+        return acc;
+    }, {} as Record<string, number>);
+
+    const totalSales = Object.values(salesByCategory).reduce((sum, sales) => sum + sales, 0);
+
+    return Object.entries(salesByCategory).map(([name, sales]) => ({
+        name,
+        value: sales,
+        percent: totalSales > 0 ? (sales / totalSales) * 100 : 0,
+    }));
+  }, [allOrders, products]);
+
+  const userGrowthData = useMemo(() => {
+    const usersByMonth = usersList.reduce((acc, user) => {
+        if (user.createdAt) {
+            const month = new Date(user.createdAt).toLocaleString('default', { month: 'short' });
+            acc[month] = (acc[month] || 0) + 1;
+        }
+        return acc;
+    }, {} as Record<string, number>);
+
+    let cumulativeUsers = 0;
+    const monthOrder = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+    return monthOrder.map(month => {
+        cumulativeUsers += usersByMonth[month] || 0;
+        return {
+            month,
+            users: cumulativeUsers
+        };
+    }).filter(d => d.users > 0);
+  }, [usersList]);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -52,7 +136,7 @@ export default function Analytics() {
           </div>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={salesData}>
+              <AreaChart data={salesAndOrdersData}>
                 <defs>
                   <linearGradient id="colorRevenue2" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
@@ -69,6 +153,7 @@ export default function Analytics() {
                     borderRadius: '8px',
                     color: '#fff'
                   }}
+                  formatter={(value: number) => `₹${value.toLocaleString('en-IN')}`}
                 />
                 <Area
                   type="monotone"
@@ -99,16 +184,16 @@ export default function Analytics() {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={categoryData}
+                  data={categorySalesData}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  label={({ name, percent }) => `${name} ${percent.toFixed(0)}%`}
                   outerRadius={100}
                   fill="#8884d8"
                   dataKey="value"
                 >
-                  {categoryData.map((entry, index) => (
+                  {categorySalesData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
@@ -119,7 +204,9 @@ export default function Analytics() {
                     borderRadius: '8px',
                     color: '#fff'
                   }}
+                  formatter={(value: number) => `₹${value.toLocaleString('en-IN')}`}
                 />
+                 <Legend />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -142,7 +229,7 @@ export default function Analytics() {
           </div>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={salesData}>
+              <BarChart data={salesAndOrdersData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.1} />
                 <XAxis dataKey="month" stroke="#6b7280" />
                 <YAxis stroke="#6b7280" />
@@ -219,7 +306,7 @@ export default function Analytics() {
         </div>
         <div className="h-96">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={salesData}>
+            <AreaChart data={salesAndOrdersData}>
               <defs>
                 <linearGradient id="colorRevenue3" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
@@ -232,7 +319,8 @@ export default function Analytics() {
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.1} />
               <XAxis dataKey="month" stroke="#6b7280" />
-              <YAxis stroke="#6b7280" />
+              <YAxis yAxisId="left" stroke="#10b981" />
+              <YAxis yAxisId="right" orientation="right" stroke="#3b82f6" />
               <Tooltip
                 contentStyle={{
                   backgroundColor: 'rgba(17, 24, 39, 0.95)',
@@ -243,6 +331,7 @@ export default function Analytics() {
               />
               <Legend />
               <Area
+                yAxisId="left"
                 type="monotone"
                 dataKey="revenue"
                 stroke="#10b981"
@@ -251,6 +340,7 @@ export default function Analytics() {
                 fill="url(#colorRevenue3)"
               />
               <Area
+                yAxisId="right"
                 type="monotone"
                 dataKey="orders"
                 stroke="#3b82f6"
@@ -263,8 +353,8 @@ export default function Analytics() {
         </div>
       </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {categoryData.map((category, index) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {categorySalesData.map((category, index) => (
           <motion.div
             key={category.name}
             initial={{ opacity: 0, y: 20 }}
@@ -280,9 +370,9 @@ export default function Analytics() {
               />
             </div>
             <p className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-              ${category.sales.toLocaleString()}
+              ₹{category.value.toLocaleString('en-IN')}
             </p>
-            <p className="text-sm text-gray-600 dark:text-gray-400">{category.value}% of total sales</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">{category.percent.toFixed(1)}% of total sales</p>
           </motion.div>
         ))}
       </div>

@@ -12,6 +12,7 @@ import {
   ListOrdered,
 } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
+import ProfilePage from "@/components/ProfilePageComponents";
 
 const UserProfilePage = () => {
   const navigate = useNavigate();
@@ -106,9 +107,11 @@ const UserProfilePage = () => {
             Manage your account and view your details.
           </p>
         </div>
-
+        <div className="mb-8">
+        <ProfilePage/>
+        </div>
         {/* User Info */}
-        <div className="bg-gradient-to-br from-gray-800/50 to-black/50 backdrop-blur-sm border border-gray-700/50 rounded-3xl p-4 sm:p-6 lg:p-8 mb-8 sm:mb-12">
+        {/* <div className="bg-gradient-to-br from-gray-800/50 to-black/50 backdrop-blur-sm border border-gray-700/50 rounded-3xl p-4 sm:p-6 lg:p-8 mb-8 sm:mb-12">
           <h2 className="text-xl sm:text-2xl font-bold text-white mb-4 sm:mb-6 flex items-center">
             <UserIcon className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-amber-400" />
             Personal Information
@@ -154,83 +157,94 @@ const UserProfilePage = () => {
               </span>
             </p>
           </div>
-        </div>
+        </div> */}
 
         {/* Quick Actions */}
- 
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12">
-  {[
-    {
-      to: "/partner-wallet",
-      icon: (
-        <DollarSign className="w-8 h-8 sm:w-10 sm:h-10 text-amber-400 mb-2 sm:mb-4" />
-      ),
-      title: "My Wallet",
-      desc: "View your earnings and transactions",
-    },
-    {
-      to: "/b2b-catalog",
-      icon: (
-        <ShoppingBag className="w-8 h-8 sm:w-10 sm:h-10 text-white mb-2 sm:mb-4" />
-      ),
-      title: "B2B Orders",
-      desc: "Place new B2B orders",
-    },
-    {
-      to: "/queue-tracker",
-      icon: (
-        <ListOrdered className="w-8 h-8 sm:w-10 sm:h-10 text-white mb-2 sm:mb-4" />
-      ),
-      title: "My Queue",
-      desc: "Track your queued orders",
-    },
-    {
-      to: "/join-brpp",
-      icon: (
-        <Briefcase className="w-8 h-8 sm:w-10 sm:h-10 text-white mb-2 sm:mb-4" />
-      ),
-      title: "BRPP Program",
-      desc: "Join or manage BRPP membership",
-    },
-    ...(user.role === "admin"
-      ? [
-          {
-            to: "/admin",
-            icon: (
-              <Briefcase className="w-8 h-8 sm:w-10 sm:h-10 text-red-400 mb-2 sm:mb-4" />
-            ),
-            title: "Go to Admin Dashboard",
-            desc: "Manage products, orders, customers and analytics",
-            newTab: true, // flag to open in new tab
-          },
-        ]
-      : []),
-  ].map((item, idx) => {
-    const commonClasses =
-      "bg-gradient-to-br from-gray-800/50 to-black/50 backdrop-blur-sm border border-gray-700/50 rounded-3xl p-4 sm:p-6 text-center flex flex-col items-center justify-center hover:shadow-2xl hover:shadow-amber-400/30 transition-all duration-300 transform hover:scale-105";
+          {[
+            {
+              to: "/partner-wallet",
+              icon: (
+                <DollarSign className="w-8 h-8 sm:w-10 sm:h-10 text-amber-400 mb-2 sm:mb-4" />
+              ),
+              title: "My Wallet",
+              desc: "View your earnings and transactions",
+            },
+            {
+              to: "/my-orders",
+              icon: (
+                <ShoppingBag className="w-8 h-8 sm:w-10 sm:h-10 text-white mb-2 sm:mb-4" />
+              ),
+              title: "My Orders",
+              desc: "View all your past orders",
+            },
+            {
+              to: "/b2b-catalog",
+              icon: (
+                <ShoppingBag className="w-8 h-8 sm:w-10 sm:h-10 text-white mb-2 sm:mb-4" />
+              ),
+              title: "B2B Orders",
+              desc: "Place new B2B orders",
+            },
+            {
+              to: "/queue-tracker",
+              icon: (
+                <ListOrdered className="w-8 h-8 sm:w-10 sm:h-10 text-white mb-2 sm:mb-4" />
+              ),
+              title: "My Queue",
+              desc: "Track your queued orders",
+            },
+            {
+              to: "/join-brpp",
+              icon: (
+                <Briefcase className="w-8 h-8 sm:w-10 sm:h-10 text-white mb-2 sm:mb-4" />
+              ),
+              title: "BRPP Program",
+              desc: "Join or manage BRPP membership",
+            },
+            ...(user.role === "admin"
+              ? [
+                  {
+                    to: "/admin",
+                    icon: (
+                      <Briefcase className="w-8 h-8 sm:w-10 sm:h-10 text-red-400 mb-2 sm:mb-4" />
+                    ),
+                    title: "Go to Admin Dashboard",
+                    desc: "Manage products, orders, customers and analytics",
+                    newTab: true,
+                  },
+                ]
+              : []),
+          ].map((item, idx) => {
+            const commonClasses =
+              "bg-gradient-to-br from-gray-800/50 to-black/50 backdrop-blur-sm border border-gray-700/50 rounded-3xl p-4 sm:p-6 text-center flex flex-col items-center justify-center hover:shadow-2xl hover:shadow-amber-400/30 transition-all duration-300 transform hover:scale-105";
 
-    return item.newTab ? (
-      <a
-        key={idx}
-        href={item.to}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={commonClasses}
-      >
-        {item.icon}
-        <h3 className="text-lg sm:text-xl font-bold text-white">{item.title}</h3>
-        <p className="text-gray-300 text-xs sm:text-sm">{item.desc}</p>
-      </a>
-    ) : (
-      <Link key={idx} to={item.to} className={commonClasses}>
-        {item.icon}
-        <h3 className="text-lg sm:text-xl font-bold text-white">{item.title}</h3>
-        <p className="text-gray-300 text-xs sm:text-sm">{item.desc}</p>
-      </Link>
-    );
-  })}
-</div>
-
+            return item.newTab ? (
+              <a
+                key={idx}
+                href={item.to}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={commonClasses}
+              >
+                {item.icon}
+                <h3 className="text-lg sm:text-xl font-bold text-white">
+                  {item.title}
+                </h3>
+                <p className="text-gray-300 text-xs sm:text-sm">{item.desc}</p>
+              </a>
+            ) : (
+              <Link key={idx} to={item.to} className={commonClasses}>
+                {item.icon}
+                <h3 className="text-lg sm:text-xl font-bold text-white">
+                  {item.title}
+                </h3>
+                <p className="text-gray-300 text-xs sm:text-sm">{item.desc}</p>
+              </Link>
+            );
+          })}
+        </div>
 
         {/* Logout */}
         <div className="text-center">

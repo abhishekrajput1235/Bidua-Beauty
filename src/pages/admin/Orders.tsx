@@ -1,17 +1,41 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Filter, Download, Eye } from 'lucide-react';
-import { orders } from '../../data/admin/mockData';
+import { useOrderStore } from '@/store/orderStore';
+import { useAuthStore } from '@/store/authStore';
+import OrderModal from '../../components/admin/orderModal'; // import your modal
 
 export default function Orders() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const filteredOrders = orders.filter(order => {
+  const { token } = useAuthStore();
+  const { allOrders, fetchAllOrders, loading, error } = useOrderStore();
+
+  useEffect(() => {
+    fetchAllOrders();
+  }, [fetchAllOrders]);
+
+  const openModal = (order: any) => {
+    setSelectedOrder(order);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setSelectedOrder(null);
+    setIsModalOpen(false);
+  };
+
+  const filteredOrders = allOrders.filter((order) => {
+    const orderId = order._id || '';
+    const customerName = order.user?.name || '';
     const matchesSearch =
-      order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customer.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
+      orderId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customerName.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      statusFilter === 'all' || order.status.toLowerCase() === statusFilter.toLowerCase();
     return matchesSearch && matchesStatus;
   });
 
@@ -23,24 +47,21 @@ export default function Orders() {
       pending: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
       cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
     };
-    return colors[status as keyof typeof colors] || colors.pending;
+    return colors[status.toLowerCase() as keyof typeof colors] || colors.pending;
   };
 
   const statusCounts = {
-    all: orders.length,
-    pending: orders.filter(o => o.status === 'pending').length,
-    processing: orders.filter(o => o.status === 'processing').length,
-    shipped: orders.filter(o => o.status === 'shipped').length,
-    delivered: orders.filter(o => o.status === 'delivered').length,
-    cancelled: orders.filter(o => o.status === 'cancelled').length,
+    all: allOrders.length,
+    pending: allOrders.filter(o => o.status.toLowerCase() === 'pending').length,
+    processing: allOrders.filter(o => o.status.toLowerCase() === 'processing').length,
+    shipped: allOrders.filter(o => o.status.toLowerCase() === 'shipped').length,
+    delivered: allOrders.filter(o => o.status.toLowerCase() === 'delivered').length,
+    cancelled: allOrders.filter(o => o.status.toLowerCase() === 'cancelled').length,
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="space-y-6"
-    >
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Orders</h1>
@@ -52,6 +73,7 @@ export default function Orders() {
         </button>
       </div>
 
+      {/* Status Filters */}
       <div className="flex flex-wrap gap-2">
         {Object.entries(statusCounts).map(([status, count]) => (
           <button
@@ -68,6 +90,7 @@ export default function Orders() {
         ))}
       </div>
 
+      {/* Table */}
       <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm">
         <div className="p-4 border-b border-gray-200 dark:border-gray-800">
           <div className="flex flex-col sm:flex-row gap-4">
@@ -92,47 +115,37 @@ export default function Orders() {
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-gray-800/50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Order ID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Customer
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Amount
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Date
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Actions
-                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Order ID</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Customer</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Amount</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
               {filteredOrders.map((order) => (
                 <motion.tr
-                  key={order.id}
+                  key={order._id}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">{order.id}</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">{order._id}</span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm text-gray-700 dark:text-gray-300">{order.customer}</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">{order.user?.name || 'Guest'}</span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                      ${order.amount.toFixed(2)}
+                      ₹{order.totalAmount.toLocaleString()}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">{order.date}</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                      {new Date(order.createdAt).toLocaleString()}
+                    </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
@@ -140,7 +153,10 @@ export default function Orders() {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <button className="p-2 text-gray-600 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors">
+                    <button
+                      className="p-2 text-gray-600 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors"
+                      onClick={() => openModal(order)}
+                    >
                       <Eye className="w-4 h-4" />
                     </button>
                   </td>
@@ -156,6 +172,14 @@ export default function Orders() {
           </div>
         )}
       </div>
+
+      {/* Modal */}
+      {selectedOrder && (
+        <OrderModal order={selectedOrder} isOpen={isModalOpen} onClose={closeModal} />
+      )}
     </motion.div>
   );
 }
+
+
+

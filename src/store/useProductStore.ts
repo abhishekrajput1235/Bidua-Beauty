@@ -18,6 +18,10 @@ interface Rating {
 }
 
 export interface Product {
+  minOrderQty: ReactI18NextChildren | Iterable<ReactI18NextChildren>;
+  id: any;
+  mrp: any;
+  image: any;
   sku: string;
   _id: string;
   productId: string;

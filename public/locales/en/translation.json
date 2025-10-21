@@ -205,6 +205,7 @@
     "orderSummary": "Order Summary",
     "subtotal": "Subtotal",
     "shipping": "Shipping",
+    "gst": "GST",
     "total": "Total",
     "proceedToCheckout": "Proceed to Checkout",
     "secureCheckout": "✓ Secure Checkout",
@@ -228,8 +229,9 @@
     "paymentMethod": "Payment Method",
     "creditCard": "Credit/Debit Card",
     "secure": "SECURE",
-    "cashOnDelivery": "Cash on Delivery",
-    "comingSoon": "Coming Soon",
+    "cod": "Cash on Delivery",
+    "upi": "UPI",
+    "wallet": "Wallet",
     "placeOrder": "Place Secure Order",
     "processingPayment": "Processing Payment...",
     "securityFeatures": {
@@ -266,9 +268,8 @@
       "guarantee": "✓ Enjoy free shipping and our 30-day money-back guarantee"
     },
     "printReceipt": "Print Receipt",
-    "support": "Need help with your order?",
-    "email": "📧 support@luxeglow.com",
-    "phone": "📞 +91 555 123 4567"
+    "support": "Need help with your order?"
+ 
   },
   "productDetails": {
     "naturalGlowCream": {

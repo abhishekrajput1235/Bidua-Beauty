@@ -1,13 +1,47 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { User, Palette, Shield, Bell, Save } from 'lucide-react';
 import { useTheme } from '../../admincontexts/ThemeContext';
+import { useAuthStore } from '@/store/authStore';
 
 type Tab = 'profile' | 'theme' | 'security' | 'notifications';
 
 export default function Settings() {
   const [activeTab, setActiveTab] = useState<Tab>('profile');
   const { theme, toggleTheme } = useTheme();
+  const { user, updateProfile, loading } = useAuthStore();
+
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+
+  useEffect(() => {
+    if (user) {
+      setName(user.name || '');
+      setEmail(user.email || '');
+      setPhone(user.phone || '');
+    }
+  }, [user]);
+
+  const handleProfileUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+
+    const updatedData = {
+      name,
+      phone,
+    };
+
+    try {
+      await updateProfile(updatedData);
+      // Here you might want to show a success toast/notification
+      alert('Profile updated successfully!');
+    } catch (error) {
+      // Handle error, e.g., show an error toast/notification
+      console.error('Failed to update profile:', error);
+      alert('Failed to update profile.');
+    }
+  };
 
   const tabs = [
     { id: 'profile' as Tab, label: 'Profile', icon: User },
@@ -57,7 +91,7 @@ export default function Settings() {
             className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm"
           >
             {activeTab === 'profile' && (
-              <div className="p-6 space-y-6">
+              <form onSubmit={handleProfileUpdate} className="p-6 space-y-6">
                 <div>
                   <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Profile Settings</h2>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Update your personal information</p>
@@ -65,47 +99,37 @@ export default function Settings() {
 
                 <div className="flex items-center gap-6">
                   <div className="w-24 h-24 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-full flex items-center justify-center text-white text-3xl font-bold">
-                    A
+                    {name.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <button className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors">
+                    <button type="button" className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors">
                       Change Photo
                     </button>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">JPG, PNG or GIF. Max size 2MB</p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      First Name
-                    </label>
-                    <input
-                      type="text"
-                      defaultValue="Admin"
-                      className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-gray-800 dark:text-white"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Last Name
-                    </label>
-                    <input
-                      type="text"
-                      defaultValue="User"
-                      className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-gray-800 dark:text-white"
-                    />
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-gray-800 dark:text-white"
+                  />
                 </div>
-
+                
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Email Address
                   </label>
                   <input
                     type="email"
-                    defaultValue="admin@example.com"
-                    className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-gray-800 dark:text-white"
+                    value={email}
+                    readOnly
+                    className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-100 dark:bg-gray-800 dark:text-gray-400 cursor-not-allowed"
                   />
                 </div>
 
@@ -115,29 +139,20 @@ export default function Settings() {
                   </label>
                   <input
                     type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
                     placeholder="+1 (555) 000-0000"
                     className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-gray-800 dark:text-white"
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Bio
-                  </label>
-                  <textarea
-                    rows={4}
-                    placeholder="Tell us about yourself..."
-                    className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-gray-800 dark:text-white resize-none"
-                  />
-                </div>
-
                 <div className="flex justify-end">
-                  <button className="flex items-center gap-2 px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors">
+                  <button type="submit" disabled={loading} className="flex items-center gap-2 px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors disabled:bg-emerald-800 disabled:cursor-not-allowed">
                     <Save className="w-4 h-4" />
-                    <span className="font-medium">Save Changes</span>
+                    <span className="font-medium">{loading ? 'Saving...' : 'Save Changes'}</span>
                   </button>
                 </div>
-              </div>
+              </form>
             )}
 
             {activeTab === 'theme' && (
@@ -165,36 +180,6 @@ export default function Settings() {
                       />
                     </button>
                   </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <button className="p-4 border-2 border-emerald-500 rounded-lg bg-white">
-                      <div className="aspect-video bg-gradient-to-br from-white to-gray-100 rounded mb-2" />
-                      <p className="text-sm font-medium text-gray-900">Light Mode</p>
-                    </button>
-                    <button className="p-4 border-2 border-gray-700 rounded-lg bg-gray-900">
-                      <div className="aspect-video bg-gradient-to-br from-gray-800 to-gray-950 rounded mb-2" />
-                      <p className="text-sm font-medium text-white">Dark Mode</p>
-                    </button>
-                  </div>
-
-                  <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                    <h3 className="font-medium text-gray-900 dark:text-white mb-3">Accent Color</h3>
-                    <div className="flex gap-3">
-                      {['bg-emerald-500', 'bg-blue-500', 'bg-amber-500', 'bg-rose-500', 'bg-purple-500'].map((color) => (
-                        <button
-                          key={color}
-                          className={`w-10 h-10 ${color} rounded-full ring-2 ring-offset-2 ring-emerald-500 dark:ring-offset-gray-900`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex justify-end">
-                  <button className="flex items-center gap-2 px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors">
-                    <Save className="w-4 h-4" />
-                    <span className="font-medium">Save Changes</span>
-                  </button>
                 </div>
               </div>
             )}
@@ -239,19 +224,6 @@ export default function Settings() {
                   />
                 </div>
 
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-                  <h3 className="font-medium text-gray-900 dark:text-white mb-4">Two-Factor Authentication</h3>
-                  <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <div>
-                      <p className="text-sm text-gray-900 dark:text-white font-medium">Enable 2FA</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Add an extra layer of security</p>
-                    </div>
-                    <button className="relative w-14 h-7 rounded-full bg-gray-300 dark:bg-gray-700">
-                      <div className="absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full shadow-md" />
-                    </button>
-                  </div>
-                </div>
-
                 <div className="flex justify-end">
                   <button className="flex items-center gap-2 px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors">
                     <Save className="w-4 h-4" />
@@ -273,8 +245,6 @@ export default function Settings() {
                     { title: 'Order Updates', description: 'Get notified when orders are placed or updated' },
                     { title: 'Product Alerts', description: 'Receive alerts when products are low in stock' },
                     { title: 'Customer Messages', description: 'Get notified when customers send messages' },
-                    { title: 'Marketing Updates', description: 'Receive marketing and promotional content' },
-                    { title: 'Weekly Reports', description: 'Get weekly performance reports via email' },
                   ].map((item, index) => (
                     <div
                       key={index}
@@ -292,13 +262,6 @@ export default function Settings() {
                       </button>
                     </div>
                   ))}
-                </div>
-
-                <div className="flex justify-end">
-                  <button className="flex items-center gap-2 px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors">
-                    <Save className="w-4 h-4" />
-                    <span className="font-medium">Save Changes</span>
-                  </button>
                 </div>
               </div>
             )}

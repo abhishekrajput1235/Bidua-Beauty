@@ -7,6 +7,9 @@ export interface Order {
 }
 
 export interface Product {
+  productId: any;
+  _id: any;
+  units(units: any): unknown;
   id: string;
   name: string;
   price: number;

@@ -1,42 +1,10 @@
+import { useEffect, useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { DollarSign, ShoppingCart, Package, Users, TrendingUp, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { orders, salesData } from '../../data/admin/mockData';
-
-const stats = [
-  {
-    title: 'Total Revenue',
-    value: '$98,450',
-    change: '+12.5%',
-    icon: DollarSign,
-    color: 'from-emerald-500 to-teal-600',
-    trend: 'up'
-  },
-  {
-    title: 'Total Orders',
-    value: '2,345',
-    change: '+8.2%',
-    icon: ShoppingCart,
-    color: 'from-blue-500 to-cyan-600',
-    trend: 'up'
-  },
-  {
-    title: 'Products',
-    value: '456',
-    change: '+3.1%',
-    icon: Package,
-    color: 'from-amber-500 to-orange-600',
-    trend: 'up'
-  },
-  {
-    title: 'Customers',
-    value: '8,234',
-    change: '-2.4%',
-    icon: Users,
-    color: 'from-pink-500 to-rose-600',
-    trend: 'down'
-  },
-];
+import { useOrderStore } from '@/store/orderStore';
+import { useAuthStore } from '@/store/authStore';
+import { useProductStore } from '@/store/useProductStore';
 
 const container = {
   hidden: { opacity: 0 },
@@ -54,18 +22,100 @@ const item = {
 };
 
 export default function Dashboard() {
-  const recentOrders = orders.slice(0, 5);
+  const { allOrders, fetchAllOrders, loading: ordersLoading } = useOrderStore();
+  const { getAllUsers, user } = useAuthStore();
+  const { products, fetchProducts, loading: productsLoading } = useProductStore();
+  const [usersList, setUsersList] = useState([]);
+
+  useEffect(() => {
+    fetchAllOrders();
+    fetchProducts();
+    const fetchUsers = async () => {
+      const { users } = await getAllUsers();
+      if (users) {
+        setUsersList(users);
+      }
+    };
+    if (user?.role === 'admin') {
+      fetchUsers();
+    }
+  }, [fetchAllOrders, fetchProducts, getAllUsers, user]);
+
+  const totalRevenue = useMemo(() => allOrders.reduce((sum, order) => sum + order.totalAmount, 0), [allOrders]);
+  const totalOrders = allOrders.length;
+  const totalProducts = products.length;
+  const totalCustomers = usersList.length;
+
+  const stats = [
+    {
+      title: 'Total Revenue',
+      value: `₹${totalRevenue.toLocaleString('en-IN')}`,
+      change: '+12.5%', // Placeholder
+      icon: DollarSign,
+      color: 'from-emerald-500 to-teal-600',
+      trend: 'up'
+    },
+    {
+      title: 'Total Orders',
+      value: totalOrders,
+      change: '+8.2%', // Placeholder
+      icon: ShoppingCart,
+      color: 'from-blue-500 to-cyan-600',
+      trend: 'up'
+    },
+    {
+      title: 'Products',
+      value: totalProducts,
+      change: '+3.1%', // Placeholder
+      icon: Package,
+      color: 'from-amber-500 to-orange-600',
+      trend: 'up'
+    },
+    {
+      title: 'Customers',
+      value: totalCustomers,
+      change: '-2.4%', // Placeholder
+      icon: Users,
+      color: 'from-pink-500 to-rose-600',
+      trend: 'down'
+    },
+  ];
+
+  const salesData = useMemo(() => {
+    const salesByMonth = allOrders.reduce((acc, order) => {
+      const month = new Date(order.createdAt).toLocaleString('default', { month: 'short' });
+      acc[month] = (acc[month] || 0) + order.totalAmount;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const monthOrder = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    
+    return monthOrder.map(month => ({
+      month,
+      revenue: salesByMonth[month] || 0
+    })).filter(d => d.revenue > 0);
+
+  }, [allOrders]);
+
+  const recentOrders = useMemo(() => 
+    [...allOrders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5),
+    [allOrders]
+  );
 
   const getStatusColor = (status: string) => {
     const colors = {
-      delivered: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
-      processing: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-      shipped: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-      pending: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
-      cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+      Delivered: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+      Processing: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+      Shipped: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+      Pending: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
+      Cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
     };
-    return colors[status as keyof typeof colors] || colors.pending;
+    return colors[status as keyof typeof colors] || colors.Pending;
   };
+
+  if (ordersLoading || productsLoading) {
+    return <div>Loading...</div>
+  }
 
   return (
     <motion.div
@@ -82,7 +132,7 @@ export default function Dashboard() {
       </div>
 
       <motion.div variants={item} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-        {stats.map((stat, index) => (
+        {stats.map((stat) => (
           <motion.div
             key={stat.title}
             whileHover={{ y: -4 }}
@@ -142,6 +192,7 @@ export default function Dashboard() {
                   borderRadius: '8px',
                   color: '#fff'
                 }}
+                formatter={(value: number) => `₹${value.toLocaleString('en-IN')}`}
               />
               <Area
                 type="monotone"
@@ -174,22 +225,22 @@ export default function Dashboard() {
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
               {recentOrders.map((order) => (
-                <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                <tr key={order._id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">{order.id}</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">#{order._id.slice(-6)}</span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm text-gray-700 dark:text-gray-300">{order.customer}</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">{order.user?.name || 'N/A'}</span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm font-semibold text-gray-900 dark:text-white">${order.amount.toFixed(2)}</span>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white">₹{order.totalAmount.toLocaleString('en-IN')}</span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">{order.date}</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">{new Date(order.createdAt).toLocaleDateString()}</span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                      {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                      {order.status}
                     </span>
                   </td>
                 </tr>

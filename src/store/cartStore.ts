@@ -3,24 +3,58 @@ import axios from "axios";
 import { useAuthStore } from "./authStore";
 
 interface CartItem {
-  [x: string]: number;
-  price: number;
+  [x: string]: any; // To allow for flexible properties
   productId: string;
   name: string;
+  quantity: number;
+  price: number;
   sellingPrice: number;
   discountPercentage: number;
-  images: { url: string; alt: string; _id: string }[];
-  quantity: number;
+  gstPercentage: number;
+  shippingCharge: number;
+  images: { url: string; alt?: string }[];
 }
 
 interface OrderItem {
-  productId: string;
-  name: string;
-  quantity: number;
-  units: string[];
-  price: number;
-  totalPrice: number;
-  createdAt?: string;
+  _id: string;
+  items: {
+    product: { _id: string; name: string };
+    quantity: number;
+    serials: string[];
+    price: number;
+    gstAmount: number;
+    shippingCharge: number;
+  }[];
+  subTotal: number;
+  shippingCharges: number;
+  gstAmount: number;
+  totalAmount: number;
+  payment: {
+    method: "COD" | "UPI" | "Card" | "Wallet";
+    status: "Pending" | "Completed" | "Failed";
+    transactionId?: string;
+  };
+  status: "Processing" | "Shipped" | "Delivered" | "Cancelled";
+  shippingAddress: {
+    fullName: string;
+    phone: string;
+    street: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+  };
+  createdAt: string;
+}
+
+interface ShippingAddress {
+  fullName: string;
+  phone: string;
+  street: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
 }
 
 interface CartState {
@@ -31,19 +65,17 @@ interface CartState {
   totalItems: number;
 
   fetchCart: () => Promise<void>;
-  addToCart: (productId: string, quantity: number) => Promise<void>;
+  addToCart: (productId: string, quantity: number) => Promise<boolean>;
   removeFromCart: (productId: string) => Promise<void>;
   incrementCart: (productId: string) => Promise<void>;
   decrementCart: (productId: string) => Promise<void>;
-  checkout: () => Promise<void>;
+  checkout: (shippingAddress: ShippingAddress, paymentMethod: string, transactionId?: string) => Promise<OrderItem | null>;
+  clearCart: () => void;
   clearError: () => void;
   getTotalItems: () => number;
 }
 
-// const API_URL = "https://backend.biduabeauty.com/api/v1/cart";
-const API_URL = "http://localhost:5000/api/v1/cart";
-
-
+const API_URL = "http://localhost:5000/api/v1";
 
 export const useCartStore = create<CartState>((set, get) => ({
   cart: [],
@@ -60,7 +92,7 @@ export const useCartStore = create<CartState>((set, get) => ({
       set({ loading: true, error: null });
       const token = useAuthStore.getState().token;
 
-      const res = await axios.get(`${API_URL}/`, {
+      const res = await axios.get(`${API_URL}/cart/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -84,14 +116,13 @@ export const useCartStore = create<CartState>((set, get) => ({
 
   addToCart: async (productId: string, quantity: number) => {
     try {
-      if (quantity <= 0) return;
+      if (quantity <= 0) return false;
       set({ loading: true, error: null });
 
       const token = useAuthStore.getState().token;
-      console.log("Adding to cart", { productId, quantity, token });
 
       const res = await axios.post(
-        `${API_URL}/add`,
+        `${API_URL}/cart/add`,
         { productId, quantity },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -104,12 +135,14 @@ export const useCartStore = create<CartState>((set, get) => ({
         ),
         loading: false,
       });
+      return true;
     } catch (err: any) {
       console.error("❌ addToCart error:", err);
       set({
         error: err.response?.data?.message || "Failed to add to cart",
         loading: false,
       });
+      return false;
     }
   },
 
@@ -118,7 +151,7 @@ export const useCartStore = create<CartState>((set, get) => ({
       set({ loading: true, error: null });
       const token = useAuthStore.getState().token;
 
-      const res = await axios.delete(`${API_URL}/${productId}`, {
+      const res = await axios.delete(`${API_URL}/cart/${productId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -144,9 +177,8 @@ export const useCartStore = create<CartState>((set, get) => ({
       set({ loading: true, error: null });
       const token = useAuthStore.getState().token;
 
-      // Controller expects productId in body, but route has param
       const res = await axios.patch(
-        `${API_URL}/increment/${productId}`,
+        `${API_URL}/cart/increment/${productId}`,
         {productId},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -174,7 +206,7 @@ export const useCartStore = create<CartState>((set, get) => ({
       const token = useAuthStore.getState().token;
 
       const res = await axios.patch(
-        `${API_URL}/decrement/${productId}`,
+        `${API_URL}/cart/decrement/${productId}`,
         {productId},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -196,31 +228,35 @@ export const useCartStore = create<CartState>((set, get) => ({
     }
   },
 
-  checkout: async () => {
+  checkout: async (shippingAddress, paymentMethod, transactionId) => {
     try {
       set({ loading: true, error: null });
       const token = useAuthStore.getState().token;
 
       const res = await axios.post(
         `${API_URL}/checkout`,
-        {},
+        { shippingAddress, paymentMethod, transactionId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      set({
+      set((state) => ({
         cart: [],
-        orders: res.data.orders || [],
+        orders: [...state.orders, res.data.order],
         totalItems: 0,
         loading: false,
-      });
+      }));
+
+      return res.data.order;
     } catch (err: any) {
-      console.error("❌ checkout error:", err);
       set({
         error: err.response?.data?.message || "Checkout failed",
         loading: false,
       });
+      return null;
     }
   },
+
+  clearCart: () => set({ cart: [], totalItems: 0 }),
 
   clearError: () => set({ error: null }),
 }));

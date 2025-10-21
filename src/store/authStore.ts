@@ -7,7 +7,9 @@ const API_URL = "http://localhost:5000/api/v1";
 
 interface User {
   [x: string]: any;
-  map(arg0: (user: any) => JSX.Element): import("react").ReactNode | Iterable<import("react").ReactNode>;
+  map(
+    arg0: (user: any) => JSX.Element
+  ): import("react").ReactNode | Iterable<import("react").ReactNode>;
   id: string;
   email: string;
   phone?: string;
@@ -21,16 +23,39 @@ interface AuthState {
   loading: boolean;
   error: string | null;
 
-  signup: (email: string, phone: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signup: (
+    email: string,
+    phone: string,
+    password: string
+  ) => Promise<{ success: boolean; error?: string }>;
+  login: (
+    email: string,
+    password: string
+  ) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   getProfile: () => Promise<{ success: boolean; error?: string }>;
-  updateProfile: (data: { name?: string; phone?: string; role?: string }) => Promise<{ success: boolean; error?: string }>;
-  updateUserRole: (userId: string, role: string) => Promise<{ success: boolean; error?: string }>;
+  updateProfile: (data: {
+    name?: string;
+    phone?: string;
+    role?: string;
+  }) => Promise<{ success: boolean; error?: string }>;
+  updateUserRole: (
+    userId: string,
+    role: string
+  ) => Promise<{ success: boolean; error?: string }>;
   deleteUser: (userId: string) => Promise<{ success: boolean; error?: string }>;
-  forgotPassword: (email: string) => Promise<{ success: boolean; resetToken?: string; error?: string }>;
-  resetPassword: (token: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
-  getAllUsers: () => Promise<{ success: boolean; users?: User[]; error?: string }>;
+  forgotPassword: (
+    email: string
+  ) => Promise<{ success: boolean; resetToken?: string; error?: string }>;
+  resetPassword: (
+    token: string,
+    newPassword: string
+  ) => Promise<{ success: boolean; error?: string }>;
+  getAllUsers: () => Promise<{
+    success: boolean;
+    users?: User[];
+    error?: string;
+  }>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -45,7 +70,11 @@ export const useAuthStore = create<AuthState>()(
       signup: async (email, phone, password) => {
         try {
           set({ loading: true, error: null });
-          const res = await axios.post(`${API_URL}/register`, { email, phone, password });
+          const res = await axios.post(`${API_URL}/register`, {
+            email,
+            phone,
+            password,
+          });
           const { token, user } = res.data;
           set({ user, token, loading: false });
           return { success: true };
@@ -90,28 +119,37 @@ export const useAuthStore = create<AuthState>()(
           set({ user: res.data.user, loading: false });
           return { success: true };
         } catch (err: any) {
-          const message = err.response?.data?.message || "Failed to load profile";
+          const message =
+            err.response?.data?.message || "Failed to load profile";
           set({ error: message, loading: false });
           return { success: false, error: message };
         }
       },
 
       // ✅ Update profile
-      updateProfile: async (data) => {
-        try {
-          const token = get().token;
-          if (!token) return { success: false, error: "No token" };
+      updateProfile: async (updatedData: any) => {
+        const token = get().token; // get token from store
+        if (!token) throw new Error("Not authorized. Token missing.");
 
-          const res = await axios.put(`${API_URL}/profile`, data, {
-            headers: { Authorization: `Bearer ${token}` },
+        set({ loading: true, error: null });
+        try {
+          const { data } = await axios.put(`${API_URL}/profile`, updatedData, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
           });
 
-          const { user, token: newToken } = res.data;
-          set({ user, token: newToken || get().token }); // Keep old token if backend doesn't return a new one
-          return { success: true };
+          // update store user
+          set({ user: data.user, loading: false });
+          return data.user; // return updated user
         } catch (err: any) {
-          const message = err.response?.data?.message || "Failed to update profile";
-          return { success: false, error: message };
+          const msg =
+            err.response?.data?.message ||
+            err.message ||
+            "Failed to update profile";
+          set({ error: msg, loading: false });
+          throw new Error(msg);
         }
       },
 
@@ -121,13 +159,18 @@ export const useAuthStore = create<AuthState>()(
           const token = get().token;
           if (!token) return { success: false, error: "No token" };
 
-          await axios.put(`${API_URL}/users/${userId}/role`, { role }, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
+          await axios.put(
+            `${API_URL}/users/${userId}/role`,
+            { role },
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
 
           return { success: true };
         } catch (err: any) {
-          const message = err.response?.data?.message || "Failed to update user role";
+          const message =
+            err.response?.data?.message || "Failed to update user role";
           return { success: false, error: message };
         }
       },
@@ -138,14 +181,15 @@ export const useAuthStore = create<AuthState>()(
           const token = get().token;
           if (!token) return { success: false, error: "No token" };
 
-          await axios.delete(`${API_URL}/users/${userId}`, {
+          await axios.delete(`${API_URL}/${userId}`, {
             headers: { Authorization: `Bearer ${token}` },
           });
 
           if (get().user?.id === userId) set({ user: null, token: null });
           return { success: true };
         } catch (err: any) {
-          const message = err.response?.data?.message || "Failed to delete user";
+          const message =
+            err.response?.data?.message || "Failed to delete user";
           return { success: false, error: message };
         }
       },
@@ -156,7 +200,8 @@ export const useAuthStore = create<AuthState>()(
           const res = await axios.post(`${API_URL}/forgot-password`, { email });
           return { success: true, resetToken: res.data.resetToken };
         } catch (err: any) {
-          const message = err.response?.data?.message || "Failed to send reset email";
+          const message =
+            err.response?.data?.message || "Failed to send reset email";
           return { success: false, error: message };
         }
       },
@@ -164,10 +209,13 @@ export const useAuthStore = create<AuthState>()(
       // ✅ Reset password
       resetPassword: async (token, newPassword) => {
         try {
-          await axios.post(`${API_URL}/reset-password/${token}`, { newPassword });
+          await axios.post(`${API_URL}/reset-password/${token}`, {
+            newPassword,
+          });
           return { success: true };
         } catch (err: any) {
-          const message = err.response?.data?.message || "Failed to reset password";
+          const message =
+            err.response?.data?.message || "Failed to reset password";
           return { success: false, error: message };
         }
       },
@@ -184,7 +232,8 @@ export const useAuthStore = create<AuthState>()(
 
           return { success: true, users: res.data.users };
         } catch (err: any) {
-          const message = err.response?.data?.message || "Failed to fetch users";
+          const message =
+            err.response?.data?.message || "Failed to fetch users";
           return { success: false, error: message };
         }
       },

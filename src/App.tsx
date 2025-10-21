@@ -42,6 +42,7 @@ import Products from "./pages/admin/Products";
 import Customers from "./pages/admin/Customers";
 import Analytics from "./pages/admin/Analytics";
 import Settings from "./pages/admin/Settings";
+import MyOrdersPage from "./pages/MyOrdersPage";
 
 function App() {
   return (
@@ -77,6 +78,7 @@ function App() {
         <Route path="/contact-us" element={<ContactUsPage />} />
         <Route path="/join-brpp" element={<JoinBrppPage />} />
         <Route path="/b2b-catalog" element={<B2bCatalogPage />} />
+        <Route path="/my-orders" element={<MyOrdersPage/>} />
         <Route path="/partner-wallet" element={<PartnerWalletPage />} />
         <Route path="/user-profile" element={<UserProfilePage />} />
         <Route path="/queue-tracker" element={<QueueTrackerPage />} />
