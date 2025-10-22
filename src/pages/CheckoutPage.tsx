@@ -16,82 +16,107 @@ const paymentMethods = [
   { id: "Other", name: "Other", icon: Wallet },
 ];
 
-const ShippingAddressStep = ({ customerDetails, setCustomerDetails, t, onNext }) => (
+const ShippingAddressStep = ({ customerDetails, setCustomerDetails, t, onNext, isB2B, deliveryOption, setDeliveryOption }) => (
   <div className="space-y-8">
     <h2 className="text-2xl font-bold text-white mb-4">{t("checkout.customerInformation")}</h2>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {["firstName", "lastName"].map((field) => (
-        <div key={field}>
-          <label className="block text-white font-medium mb-2 capitalize">{t(`checkout.${field}`)}</label>
-          <input
-            type="text"
-            value={customerDetails[field]}
-            onChange={(e) => setCustomerDetails({ ...customerDetails, [field]: e.target.value })}
-            className="w-full bg-black/50 border border-gray-600 rounded-xl py-3 px-4 text-white placeholder-gray-400 focus:outline-none focus:border-amber-400 transition-colors"
-            required
-          />
+    {isB2B && (
+        <div className="space-y-4">
+            <h3 className="text-xl font-semibold text-white">Delivery Option</h3>
+            <div className="grid grid-cols-2 gap-4">
+                <label className={`flex flex-col items-center justify-center space-y-2 p-4 rounded-2xl border-2 transition-all duration-300 cursor-pointer ${deliveryOption === 'shipping' ? "border-amber-400 bg-amber-400/10" : "border-gray-600/50 hover:border-gray-500"}`}>
+                    <input type="radio" name="deliveryOption" value="shipping" checked={deliveryOption === 'shipping'} onChange={(e) => setDeliveryOption(e.target.value)} className="sr-only" />
+                    <Truck className={`w-8 h-8 mb-2 ${deliveryOption === 'shipping' ? "text-amber-400" : "text-gray-400"}`} />
+                    <span className={`font-medium text-center ${deliveryOption === 'shipping' ? "text-white" : "text-gray-300"}`}>Ship to my address</span>
+                </label>
+                <label className={`flex flex-col items-center justify-center space-y-2 p-4 rounded-2xl border-2 transition-all duration-300 cursor-pointer ${deliveryOption === 'warehouse' ? "border-amber-400 bg-amber-400/10" : "border-gray-600/50 hover:border-gray-500"}`}>
+                    <input type="radio" name="deliveryOption" value="warehouse" checked={deliveryOption === 'warehouse'} onChange={(e) => setDeliveryOption(e.target.value)} className="sr-only" />
+                    <Wallet className={`w-8 h-8 mb-2 ${deliveryOption === 'warehouse' ? "text-amber-400" : "text-gray-400"}`} />
+                    <span className={`font-medium text-center ${deliveryOption === 'warehouse' ? "text-white" : "text-gray-300"}`}>Store in our warehouses</span>
+                </label>
+            </div>
         </div>
-      ))}
-    </div>
-    {["email", "phone", "address"].map((field) => (
-      <div key={field}>
-        <label className="block text-white font-medium mb-2 capitalize">{t(`checkout.${field}`)}</label>
-        <input
-          type={field === "email" ? "email" : "text"}
-          value={customerDetails[field]}
-          onChange={(e) => setCustomerDetails({ ...customerDetails, [field]: e.target.value })}
-          className="w-full bg-black/50 border border-gray-600 rounded-xl py-3 px-4 text-white placeholder-gray-400 focus:outline-none focus:border-amber-400 transition-colors"
-          required
-        />
-      </div>
-    ))}
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {["city", "state", "pincode"].map((field) => (
-        <div key={field}>
-          <label className="block text-white font-medium mb-2 capitalize">{t(`checkout.${field}`)}</label>
-          <input
-            type="text"
-            value={customerDetails[field]}
-            onChange={(e) => setCustomerDetails({ ...customerDetails, [field]: e.target.value })}
-            className="w-full bg-black/50 border border-gray-600 rounded-xl py-3 px-4 text-white placeholder-gray-400 focus:outline-none focus:border-amber-400 transition-colors"
-            required
-          />
-        </div>
-      ))}
-    </div>
+    )}
+    {deliveryOption === 'shipping' && (
+        <>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {["firstName", "lastName"].map((field) => (
+                <div key={field}>
+                <label className="block text-white font-medium mb-2 capitalize">{t(`checkout.${field}`)}</label>
+                <input
+                    type="text"
+                    value={customerDetails[field]}
+                    onChange={(e) => setCustomerDetails({ ...customerDetails, [field]: e.target.value })}
+                    className="w-full bg-black/50 border border-gray-600 rounded-xl py-3 px-4 text-white placeholder-gray-400 focus:outline-none focus:border-amber-400 transition-colors"
+                    required
+                />
+                </div>
+            ))}
+            </div>
+            {["email", "phone", "address"].map((field) => (
+            <div key={field}>
+                <label className="block text-white font-medium mb-2 capitalize">{t(`checkout.${field}`)}</label>
+                <input
+                type={field === "email" ? "email" : "text"}
+                value={customerDetails[field]}
+                onChange={(e) => setCustomerDetails({ ...customerDetails, [field]: e.target.value })}
+                className="w-full bg-black/50 border border-gray-600 rounded-xl py-3 px-4 text-white placeholder-gray-400 focus:outline-none focus:border-amber-400 transition-colors"
+                required
+                />
+            </div>
+            ))}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {["city", "state", "pincode"].map((field) => (
+                <div key={field}>
+                <label className="block text-white font-medium mb-2 capitalize">{t(`checkout.${field}`)}</label>
+                <input
+                    type="text"
+                    value={customerDetails[field]}
+                    onChange={(e) => setCustomerDetails({ ...customerDetails, [field]: e.target.value })}
+                    className="w-full bg-black/50 border border-gray-600 rounded-xl py-3 px-4 text-white placeholder-gray-400 focus:outline-none focus:border-amber-400 transition-colors"
+                    required
+                />
+                </div>
+            ))}
+            </div>
+        </>
+    )}
     <button onClick={onNext} className="w-full bg-gradient-to-r from-amber-400 to-yellow-500 text-black py-4 rounded-2xl font-bold text-lg hover:shadow-2xl hover:shadow-amber-400/30 transition-all duration-300 transform hover:scale-105">
       Next: Payment
     </button>
   </div>
 );
 
-const PaymentStep = ({ customerDetails, setCustomerDetails, paymentDetails, setPaymentDetails, t, onBack, handlePlaceOrder, isProcessing, cartLoading }) => (
+const PaymentStep = ({ customerDetails, setCustomerDetails, paymentDetails, setPaymentDetails, t, onBack, handlePlaceOrder, isProcessing, cartLoading, deliveryOption }) => (
   <div className="space-y-8">
     <h2 className="text-2xl font-bold text-white mb-4">{t("checkout.paymentMethod")}</h2>
     <div className="grid grid-cols-2 gap-4">
-      {paymentMethods.map((method) => (
-        <label
-          key={method.id}
-          className={`flex flex-col items-center justify-center space-y-2 p-4 rounded-2xl border-2 transition-all duration-300 cursor-pointer ${
-            customerDetails.paymentMethod === method.id
-              ? "border-amber-400 bg-amber-400/10"
-              : "border-gray-600/50 hover:border-gray-500"
-          }`}
-        >
-          <input
-            type="radio"
-            name="payment"
-            value={method.id}
-            checked={customerDetails.paymentMethod === method.id}
-            onChange={(e) => setCustomerDetails({ ...customerDetails, paymentMethod: e.target.value })}
-            className="sr-only"
-          />
-          <method.icon className={`w-8 h-8 mb-2 ${customerDetails.paymentMethod === method.id ? "text-amber-400" : "text-gray-400"}`} />
-          <span className={`font-medium text-center ${customerDetails.paymentMethod === method.id ? "text-white" : "text-gray-300"}`}>
-            {t(`checkout.${method.id.toLowerCase().replace(/ /g, "")}`)}
-          </span>
-        </label>
-      ))}
+      {paymentMethods.map((method) => {
+        const isCodDisabled = deliveryOption === 'warehouse' && method.id === 'COD';
+        return (
+            <label
+            key={method.id}
+            className={`flex flex-col items-center justify-center space-y-2 p-4 rounded-2xl border-2 transition-all duration-300 ${isCodDisabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"} ${
+                customerDetails.paymentMethod === method.id
+                ? "border-amber-400 bg-amber-400/10"
+                : "border-gray-600/50 hover:border-gray-500"
+            }`}
+            >
+            <input
+                type="radio"
+                name="payment"
+                value={method.id}
+                checked={customerDetails.paymentMethod === method.id}
+                onChange={(e) => setCustomerDetails({ ...customerDetails, paymentMethod: e.target.value })}
+                className="sr-only"
+                disabled={isCodDisabled}
+            />
+            <method.icon className={`w-8 h-8 mb-2 ${customerDetails.paymentMethod === method.id ? "text-amber-400" : "text-gray-400"}`} />
+            <span className={`font-medium text-center ${customerDetails.paymentMethod === method.id ? "text-white" : "text-gray-300"}`}>
+                {t(`checkout.${method.id.toLowerCase().replace(/ /g, "")}`)}
+            </span>
+            </label>
+        );
+        })}
     </div>
 
     {customerDetails.paymentMethod === "Credit Card" && (
@@ -158,6 +183,7 @@ const CheckoutPage: React.FC = () => {
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const [deliveryOption, setDeliveryOption] = useState('shipping');
 
   const [customerDetails, setCustomerDetails] = useState({
     firstName: "",
@@ -177,6 +203,8 @@ const CheckoutPage: React.FC = () => {
     cvc: "",
     upiId: "",
   });
+
+  const isB2B = user?.role === 'b2b';
 
   useEffect(() => {
     getProfile();
@@ -208,7 +236,7 @@ const CheckoutPage: React.FC = () => {
     }).format(price);
 
   const getSubtotal = () =>
-    cart.reduce((sum, item) => sum + (item.sellingPrice || 0) * item.quantity, 0);
+    cart.reduce((sum, item) => sum + (isB2B ? item.b2bPrice : item.sellingPrice || 0) * item.quantity, 0);
 
   const getShippingCost = () =>
     cart.reduce((sum, item) => sum + (item.shippingCharge || 0) * item.quantity, 0);
@@ -217,7 +245,7 @@ const CheckoutPage: React.FC = () => {
     cart.reduce(
       (sum, item) =>
         sum +
-        ((item.sellingPrice || 0) *
+        (((isB2B ? item.b2bPrice : item.sellingPrice) || 0) *
           item.quantity *
           (item.gstPercentage || 0)) /
           100,
@@ -230,16 +258,20 @@ const CheckoutPage: React.FC = () => {
     e.preventDefault();
     setIsProcessing(true);
     try {
-      const shippingAddress = {
-        fullName: `${customerDetails.firstName} ${customerDetails.lastName}`,
-        phone: customerDetails.phone,
-        street: customerDetails.address,
-        city: customerDetails.city,
-        state: customerDetails.state,
-        postalCode: customerDetails.pincode,
-        country: "India",
-      };
-      const order = await checkout(shippingAddress, customerDetails.paymentMethod);
+      let shippingAddress = null;
+      if (deliveryOption === 'shipping') {
+        shippingAddress = {
+            fullName: `${customerDetails.firstName} ${customerDetails.lastName}`,
+            phone: customerDetails.phone,
+            street: customerDetails.address,
+            city: customerDetails.city,
+            state: customerDetails.state,
+            postalCode: customerDetails.pincode,
+            country: "India",
+        };
+      }
+      
+      const order = await checkout(shippingAddress, customerDetails.paymentMethod, deliveryOption);
       if (order) {
         navigate("/confirmation");
       } else {
@@ -306,6 +338,9 @@ const CheckoutPage: React.FC = () => {
                 setCustomerDetails={setCustomerDetails}
                 t={t}
                 onNext={() => setCurrentStep(2)}
+                isB2B={isB2B}
+                deliveryOption={deliveryOption}
+                setDeliveryOption={setDeliveryOption}
               />
             )}
             {currentStep === 2 && (
@@ -319,6 +354,7 @@ const CheckoutPage: React.FC = () => {
                 handlePlaceOrder={handlePlaceOrder}
                 isProcessing={isProcessing}
                 cartLoading={cartLoading}
+                deliveryOption={deliveryOption}
               />
             )}
           </div>
@@ -361,7 +397,7 @@ const CheckoutPage: React.FC = () => {
                     </div>
                     <div className="text-right">
                       <p className="text-amber-400 font-bold">
-                        {formatPrice(item.sellingPrice * item.quantity)}
+                        {formatPrice((isB2B ? item.b2bPrice : item.sellingPrice) * item.quantity)}
                       </p>
                     </div>
                   </div>
