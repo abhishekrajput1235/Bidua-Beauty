@@ -180,21 +180,58 @@
     "feature3": "सोपे रिटर्न आणि एक्सचेंज"
   },
   "footer": {
-    "brandName": "बिदुआ",
-    "brandSuffix": "ब्युटी",
-    "description": "उत्कृष्ट घटक आणि अत्याधुनिक तंत्रज्ञानासह तयार केलेले प्रीमियम स्किनकेअर. परिपूर्ण त्वचेची लक्झरी अनुभवा.",
-    "quickLinks": "द्रुत दुवे",
-    "contactUs": "संपर्क साधा",
-    "email": "support@biduaindustries.com",
-    "phone": "+91 80 4567 8900",
-    "address": "प्लॉट नं. ४५६, इंडस्ट्रियल एरिया, फेज २, इलेक्ट्रॉनिक सिटी, बेंगळुरु, कर्नाटक ५६०१००",
-    "copyright": "© २०२४ बिदुआ ब्युटी. सर्व हक्क राखीव. ❤️ भारतात बनवलेले.",
-    "privacyPolicy": "गोपनीयता धोरण",
-    "privacyPolicyText": "Privacy Policy: We protect your personal information and never share it with third parties. Your data is encrypted and secure.",
-    "termsOfService": "सेवा अटी",
-    "termsText": "Terms of Service: By purchasing BIDUA Beauty products, you agree to our quality guarantee and 30-day return policy. All sales are processed securely.",
-    "shippingInfo": "शिपिंग माहिती",
-    "shippingText": "Shipping Information: Free shipping on orders over ₹2000. Standard delivery 3-5 business days. Express delivery available. International shipping to 50+ countries."
+    "brand": {
+      "name": "बिदुआ इंडस्ट्रीज",
+      "suffix": "प्राइवेट लिमिटेड",
+      "description": "प्रीमियम स्किनकेअर जे उत्कृष्ट घटक आणि अत्याधुनिक तंत्रज्ञानासह तयार केले आहे. परिपूर्ण त्वचेच्या लक्झरीचा अनुभव घ्या."
+    },
+    "socials": {
+      "facebook": "#",
+      "twitter": "#",
+      "instagram": "#"
+    },
+    "quickLinks": {
+      "title": "द्रुत दुवे",
+      "links": [
+        { "label": "मुख्यपृष्ठ", "href": "#hero" },
+        { "label": "फायदे", "href": "#benefits" },
+        { "label": "घटक", "href": "#ingredients" },
+        { "label": "तपशील", "href": "#product-details" },
+        { "label": "पुनरावलोकने", "href": "#testimonials" },
+        { "label": "खर्च कॅल्क्युलेटर", "href": "/cost-calculator" },
+        { "label": "BRPP मध्ये सामील व्हा", "href": "/join-brpp" }
+      ]
+    },
+    "contact": {
+      "title": "आमच्याशी संपर्क साधा",
+      "email": {
+        "label": "support@biduabeauty.com",
+        "href": "mailto:support@biduabeauty.com"
+      },
+      "phone": {
+        "label": "",
+        "href": ""
+      },
+      "address": {
+        "label": "",
+        "mapUrl": ""
+      }
+    },
+    "legal": [
+      {
+        "label": "गोपनीयता धोरण",
+        "href": "/privacy-policy"
+      },
+      {
+        "label": "सेवा अटी",
+        "href": "/terms-and-condition"
+      },
+      {
+        "label": "शिपिंग माहिती",
+        "href": "/return-policy"
+      }
+    ],
+    "copyright": "© 2024 बिदुआ ब्यूटी. सर्व हक्क राखीव. ❤️ सह भारतात बनवलेले"
   },
   "cart": {
     "title": "शॉपिंग कार्ट",

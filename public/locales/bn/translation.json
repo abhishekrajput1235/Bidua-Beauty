@@ -182,21 +182,58 @@
     "feature3": "সহজ রিটার্ন এবং এক্সচেঞ্জ"
   },
   "footer": {
-    "brandName": "বিদুয়া",
-    "brandSuffix": "বিউটি",
-    "description": "সেরা উপাদান এবং অত্যাধুনিক প্রযুক্তি দিয়ে তৈরি প্রিমিয়াম স্কিনকেয়ার। নিখুঁত ত্বকের বিলাসিতা অনুভব করুন।",
-    "quickLinks": "দ্রুত লিঙ্ক",
-    "contactUs": "যোগাযোগ করুন",
-    "email": "support@biduaindustries.com",
-    "phone": "+91 80 4567 8900",
-    "address": "প্লট নং ৪৫৬, ইন্ডাস্ট্রিয়াল এরিয়া, ফেজ ২, ইলেকট্রনিক সিটি, বেঙ্গালুরু, কর্ণাটক ৫৬০১০০",
-    "copyright": "© ২০২৪ বিদুয়া বিউটি। সমস্ত অধিকার সংরক্ষিত। ❤️ ভারতে তৈরি।",
-    "privacyPolicy": "গোপনীয়তা নীতি",
-    "privacyPolicyText": "Privacy Policy: We protect your personal information and never share it with third parties. Your data is encrypted and secure.",
-    "termsOfService": "সেবার শর্তাবলী",
-    "termsText": "Terms of Service: By purchasing BIDUA Beauty products, you agree to our quality guarantee and 30-day return policy. All sales are processed securely.",
-    "shippingInfo": "শিপিং তথ্য",
-    "shippingText": "Shipping Information: Free shipping on orders over ₹2000. Standard delivery 3-5 business days. Express delivery available. International shipping to 50+ countries."
+    "brand": {
+      "name": "বিদুয়া ইন্ডাস্ট্রিজ",
+      "suffix": "প্রাইভেট লিমিটেড",
+      "description": "প্রিমিয়াম স্কিনকেয়ার যা সেরা উপাদান এবং অত্যাধুনিক প্রযুক্তি দিয়ে তৈরি। নিখুঁত ত্বকের বিলাসিতা অনুভব করুন।"
+    },
+    "socials": {
+      "facebook": "#",
+      "twitter": "#",
+      "instagram": "#"
+    },
+    "quickLinks": {
+      "title": "দ্রুত লিঙ্ক",
+      "links": [
+        { "label": "হোম", "href": "#hero" },
+        { "label": "সুবিধা", "href": "#benefits" },
+        { "label": "উপাদান", "href": "#ingredients" },
+        { "label": "বিস্তারিত", "href": "#product-details" },
+        { "label": "পর্যালোচনা", "href": "#testimonials" },
+        { "label": "খরচ ক্যালকুলেটর", "href": "/cost-calculator" },
+        { "label": "BRPP এ যোগ দিন", "href": "/join-brpp" }
+      ]
+    },
+    "contact": {
+      "title": "যোগাযোগ করুন",
+      "email": {
+        "label": "support@biduabeauty.com",
+        "href": "mailto:support@biduabeauty.com"
+      },
+      "phone": {
+        "label": "",
+        "href": ""
+      },
+      "address": {
+        "label": "",
+        "mapUrl": ""
+      }
+    },
+    "legal": [
+      {
+        "label": "গোপনীয়তা নীতি",
+        "href": "/privacy-policy"
+      },
+      {
+        "label": "সেবার শর্তাবলী",
+        "href": "/terms-and-condition"
+      },
+      {
+        "label": "শিপিং তথ্য",
+        "href": "/return-policy"
+      }
+    ],
+    "copyright": "© ২০২৪ বিদুয়া বিউটি। সর্বস্বত্ব সংরক্ষিত। ❤️ দিয়ে ভারতে তৈরি"
   },
   "cart": {
     "title": "শপিং কার্ট",

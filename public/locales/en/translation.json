@@ -464,15 +464,15 @@
     "legal": [
       {
         "label": "Privacy Policy",
-        "alert": "Privacy Policy: We protect your personal information and never share it with third parties. Your data is encrypted and secure."
+        "href": "/privacy-policy"
       },
       {
         "label": "Terms of Service",
-        "alert": "Terms of Service: By purchasing BIDUA Beauty products, you agree to our quality guarantee and 30-day return policy. All sales are processed securely."
+        "href": "/terms-and-condition"
       },
       {
         "label": "Shipping Info",
-        "alert": "Shipping Information: Free shipping on orders over ₹2000. Standard delivery 3-5 business days. Express delivery available. International shipping to 50+ countries."
+        "href": "/return-policy"
       }
     ],
     "copyright": "© 2024 BIDUA Beauty. All rights reserved. crafted with ❤️ in India"
