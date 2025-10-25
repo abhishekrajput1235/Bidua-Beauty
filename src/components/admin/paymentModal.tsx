@@ -10,7 +10,7 @@ interface Payment {
   _id: string;
   user: User;
   amount: number;
-  status: string;
+  paymentStatus: string;
   paymentId: string;
   orderId: string;
   createdAt: string;
@@ -68,7 +68,7 @@ const PaymentModal = ({ payment, isOpen, onClose }: PaymentModalProps) => {
               </div>
               <div>
                 <h3 className="font-semibold text-gray-800 dark:text-gray-200">Order ID</h3>
-                <p className="text-gray-600 dark:text-gray-300">{payment.orderId}</p>
+                <p className="text-gray-600 dark:text-gray-300">{payment.order}</p>
               </div>
               <div>
                 <h3 className="font-semibold text-gray-800 dark:text-gray-200">Amount</h3>
@@ -78,10 +78,10 @@ const PaymentModal = ({ payment, isOpen, onClose }: PaymentModalProps) => {
                 <h3 className="font-semibold text-gray-800 dark:text-gray-200">Status</h3>
                 <span
                   className={`inline-block px-2 py-1 mt-1 rounded text-sm font-medium ${statusColor(
-                    payment?.status
+                    payment?.paymentStatus
                   )}`}
                 >
-                  {payment.status}
+                  {payment.paymentStatus}
                 </span>
               </div>
               <div>
