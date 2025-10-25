@@ -20,6 +20,7 @@ const AdminLayout = () => {
     { name: "Orders", path: "/admin/orders", icon: ShoppingBag },
     { name: "Products", path: "/admin/products", icon: BarChart3 },
     { name: "Customers", path: "/admin/customers", icon: Users },
+    { name: "Payments", path: "/admin/payments-history", icon: BarChart3 },
     { name: "Analytics", path: "/admin/analytics", icon: BarChart3 },
     { name: "Settings", path: "/admin/settings", icon: Settings },
   ];

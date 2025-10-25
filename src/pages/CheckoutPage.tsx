@@ -271,7 +271,7 @@ const CheckoutPage: React.FC = () => {
         };
       }
       
-      const order = await checkout(shippingAddress, customerDetails.paymentMethod, deliveryOption);
+      const order = await checkout(shippingAddress, customerDetails.paymentMethod);
       if (order) {
         navigate("/confirmation");
       } else {

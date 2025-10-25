@@ -38,7 +38,7 @@ const ConfirmationPage = () => {
 
   const generatePrintContent = (order: Order) => {
     // This is a simplified receipt. You can expand this with more details.
-    const address = order.shippingAddress.street
+    const address = order.shippingAddress?.street
       ? `${order.shippingAddress.street}, ${order.shippingAddress.city}, ${order.shippingAddress.state} - ${order.shippingAddress.postalCode}`
       : 'Address not provided';
 
@@ -49,9 +49,9 @@ const ConfirmationPage = () => {
       Order Date: ${new Date(order.createdAt).toLocaleDateString('en-IN')}
       
       Customer:
-      - Name: ${order.shippingAddress.fullName}
+      - Name: ${order.shippingAddress?.fullName || 'N/A'}
       - Email: ${order.user.email}
-      - Phone: ${order.shippingAddress.phone}
+      - Phone: ${order.shippingAddress?.phone || 'N/A'}
 
       Shipping Address:
       - ${address}
@@ -165,9 +165,9 @@ const ConfirmationPage = () => {
               <h3 className="text-amber-400 font-bold text-base sm:text-lg mb-3">{t('confirmation.orderDetails')}</h3>
               <div className="space-y-2 text-gray-300 text-sm sm:text-base">
                 <p><span className="text-white font-medium">{t('confirmation.orderNumber')}</span> <span className="break-all">#{orderNumber}</span></p>
-                <p><span className="text-white font-medium">{t('confirmation.customer')}</span> {shippingAddress.fullName}</p>
+                <p><span className="text-white font-medium">{t('confirmation.customer')}</span> {shippingAddress?.fullName || 'N/A'}</p>
                 <p><span className="text-white font-medium">{t('confirmation.email')}</span> <span className="break-all">{user.email}</span></p>
-                <p><span className="text-white font-medium">{t('confirmation.phone')}</span> {shippingAddress.phone}</p>
+                <p><span className="text-white font-medium">{t('confirmation.phone')}</span> {shippingAddress?.phone || 'N/A'}</p>
                 <p><span className="text-white font-medium">Payment Method:</span> {latestOrder.payment.method}</p>
                 <p><span className="text-white font-medium">Payment Status:</span> {latestOrder.payment.status}</p>
               </div>
@@ -176,7 +176,7 @@ const ConfirmationPage = () => {
             <div>
               <h3 className="text-amber-400 font-bold text-base sm:text-lg mb-3">{t('confirmation.deliveryInformation')}</h3>
               <div className="space-y-2 text-gray-300 text-sm sm:text-base">
-                <p><span className="text-white font-medium">{t('confirmation.address')}</span> {shippingAddress.street ? `${shippingAddress.street}, ${shippingAddress.city}, ${shippingAddress.state} ${shippingAddress.postalCode}` : 'Address not provided'}</p>
+                <p><span className="text-white font-medium">{t('confirmation.address')}</span> {shippingAddress?.street ? `${shippingAddress.street}, ${shippingAddress.city}, ${shippingAddress.state} ${shippingAddress.postalCode}` : 'Address not provided'}</p>
                 <p><span className="text-white font-medium">{t('confirmation.estimatedDelivery')}</span> {estimatedDelivery}</p>
                 <p><span className="text-white font-medium">{t('confirmation.shipping')}</span> <span className="text-green-400">{formatPrice(latestOrder.shippingCharges)}</span></p>
               </div>

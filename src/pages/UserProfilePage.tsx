@@ -212,7 +212,7 @@ const UserProfilePage = () => {
                     ),
                     title: "Go to Admin Dashboard",
                     desc: "Manage products, orders, customers and analytics",
-                    newTab: true,
+                    // newTab: true,
                   },
                 ]
               : []),

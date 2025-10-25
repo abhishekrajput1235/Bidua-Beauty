@@ -3,12 +3,12 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ArrowLeft, Plus, Minus, Trash2, ShoppingBag } from "lucide-react";
 import { useCartStore } from "../store/cartStore";
-import { products } from "@/data/admin/mockData";
 import { useAuthStore } from "@/store/authStore";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 interface CartItem {
+  stock: any;
   _id: string;
   productId?: string;
   name: string;
@@ -104,27 +104,11 @@ const CartPage = () => {
 
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-4 lg:space-y-6">
-            {(cart as CartItem[])?.map((item) => {
-              const product =
-                products.find((p) => {
-                  const pid = p.productId;
-                  const mid = p._id;
-                  return (
-                    (pid && item.productId && pid === item.productId) ||
-                    (mid && item.productId && mid === item.productId) ||
-                    (pid && item._id && pid === item._id) ||
-                    (mid && item._id && mid === item._id)
-                  );
-                }) || null;
-
+            {(cart as CartItem[])?.map((item: CartItem) => {
               let availableUnits = 0;
-              if (product) {
-                if (Array.isArray(product?.units) && product.units.length > 0) {
-                  availableUnits = product.units.filter((u) => !u.isSold).length;
-                } else if (typeof product.stock === "number") {
-                  availableUnits = product.stock;
-                }
-              } else {
+              // Use stock information directly from the cart item, which is populated by the backend.
+              // This avoids using stale or incorrect mock data.
+              if (item) {
                 if (Array.isArray(item?.units) && item.units.length > 0) {
                   availableUnits = item.units.filter((u) => !u.isSold).length;
                 } else if (typeof item.stock === "number") {
@@ -142,7 +126,7 @@ const CartPage = () => {
 
               return (
                 <div
-                  key={item.productId ?? item._id}
+                  key={item._id}
                   className={`bg-gradient-to-br from-gray-800/50 to-black/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl lg:rounded-3xl p-4 lg:p-6 ${
                     isOutOfStock ? "opacity-60" : ""
                   }`}
@@ -206,7 +190,7 @@ const CartPage = () => {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           <button
-                            onClick={() => handleDecrement(item.productId ?? item._id)}
+                            onClick={() => handleDecrement(item.productId)}
                             disabled={isOutOfStock || item.quantity <= 1}
                             className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
                               isOutOfStock
@@ -222,7 +206,7 @@ const CartPage = () => {
                           </span>
 
                           <button
-                            onClick={() => handleIncrement(item.productId ?? item._id)}
+                            onClick={() => handleIncrement(item.productId)}
                             disabled={isOutOfStock || hasReachedLimit}
                             className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
                               isOutOfStock || hasReachedLimit
@@ -235,9 +219,11 @@ const CartPage = () => {
                         </div>
 
                         <button
-                          onClick={() => handleRemove(item.productId ?? item._id)}
+                          onClick={() => handleRemove(item.productId)}
+                        
                           className="text-red-400 hover:text-red-300 transition-colors duration-300 p-2 hover:bg-red-400/10 rounded-lg"
                         >
+                      
                           <Trash2 size={18} />
                         </button>
                       </div>
@@ -258,7 +244,7 @@ const CartPage = () => {
                     user?.role === "b2b" && item.b2bPrice ? item.b2bPrice : item.sellingPrice;
                   return (
                     <div
-                      key={item.productId ?? item._id}
+                      key={item._id}
                       className="flex justify-between text-gray-300 text-sm"
                     >
                       <span>

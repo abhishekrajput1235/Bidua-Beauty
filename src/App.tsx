@@ -42,6 +42,7 @@ import Products from "./pages/admin/Products";
 import Customers from "./pages/admin/Customers";
 import Analytics from "./pages/admin/Analytics";
 import Settings from "./pages/admin/Settings";
+import PaymentsHistory from "./pages/admin/PaymentsHistory";
 import MyOrdersPage from "./pages/MyOrdersPage";
 
 function App() {
@@ -109,6 +110,7 @@ function App() {
           <Route path="orders" element={<Orders />} />
           <Route path="products" element={<Products />} />
           <Route path="customers" element={<Customers />} />
+          <Route path="payments-history" element={<PaymentsHistory />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="settings" element={<Settings />} />
         </Route>
