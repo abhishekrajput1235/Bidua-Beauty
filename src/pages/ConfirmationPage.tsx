@@ -4,18 +4,25 @@ import { useTranslation } from 'react-i18next';
 import { CheckCircle, Package, Truck, Mail, Home, Loader, AlertTriangle } from 'lucide-react';
 import { useOrderStore, Order } from '../store/orderStore';
 import { useCartStore } from '../store/cartStore';
+import { useAuthStore } from '../store/authStore';
 
 const ConfirmationPage = () => {
   const { t } = useTranslation();
-  const { userOrders, fetchUserOrders, loading, error } = useOrderStore();
+  const token = useAuthStore((s) => s.token);
+  const orders = useOrderStore((s) => s.orders);
+  const fetchUserOrders = useOrderStore((s) => s.fetchUserOrders);
+  const loading = useOrderStore((s) => s.loading);
+  const error = useOrderStore((s) => s.error);
   const { clearCart } = useCartStore();
 
   useEffect(() => {
-    fetchUserOrders();
+    if (token) {
+      fetchUserOrders(token);
+    }
     clearCart();
-  }, [fetchUserOrders, clearCart]);
+  }, [fetchUserOrders, clearCart, token]);
 
-  const latestOrder = userOrders.length > 0 ? [...userOrders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0] : null;
+  const latestOrder = (orders && orders.length > 0) ? [...orders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0] : null;
 
   const getEstimatedDelivery = (orderDate: string) => {
     const date = new Date(orderDate);

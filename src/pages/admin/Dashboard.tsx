@@ -28,7 +28,7 @@ export default function Dashboard() {
   const [usersList, setUsersList] = useState([]);
 
   useEffect(() => {
-    fetchAllOrders();
+    fetchAllOrders(user?.token);
     fetchProducts();
     const fetchUsers = async () => {
       const { users } = await getAllUsers();

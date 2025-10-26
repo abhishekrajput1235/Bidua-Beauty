@@ -17,51 +17,21 @@ import {
   ShoppingCart,
   Download,
 } from "lucide-react";
-import { useOrderStore } from "@/store/orderStore";
+import { useOrderStore, Order } from "@/store/orderStore";
 import { useAuthStore } from "../store/authStore";
 import html2pdf from 'html2pdf.js';
 import Invoice from '../components/Invoice';
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL || "";
 
-type Product = {
-  _id?: string;
-  name?: string;
-  images?: { url: string }[];
-};
-
-type OrderItem = {
-  product: Product | null;
-  quantity: number;
-  price: number;
-  serials?: string[];
-};
-
-type Order = {
-  _id: string;
-  items: OrderItem[];
-  createdAt: string;
-  status: "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled";
-  payment: {
-    method?: string;
-    status?: string;
-    transactionId?: string;
-  };
-  shippingAddress?: {
-    fullName?: string;
-    street?: string;
-    city?: string;
-    state?: string;
-    postalCode?: string;
-    country?: string;
-  };
-  totalAmount: number;
-};
-
 const MyOrdersPage: React.FC = () => {
   const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
-  const { userOrders, fetchUserOrders, loading, error } = useOrderStore();
+  const token = useAuthStore((s) => s.token);
+  const orders = useOrderStore((s) => s.orders);
+  const fetchUserOrders = useOrderStore((s) => s.fetchUserOrders);
+  const loading = useOrderStore((s) => s.loading);
+  const error = useOrderStore((s) => s.error);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -75,8 +45,10 @@ const MyOrdersPage: React.FC = () => {
       navigate("/login");
       return;
     }
-    fetchUserOrders(user._id);
-  }, [user, navigate, fetchUserOrders]);
+    if (token) {
+      fetchUserOrders(token);
+    }
+  }, [user, token, navigate, fetchUserOrders]);
 
   useEffect(() => {
     if (orderToPrint && invoiceRef.current) {
@@ -127,11 +99,9 @@ const MyOrdersPage: React.FC = () => {
     }
   };
 
-  const orders: Order[] = (userOrders as unknown as Order[]) || [];
-
   const filteredOrders = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
-    return orders
+    return (orders || [])
       .slice()
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .filter((order) => {
@@ -346,7 +316,7 @@ const MyOrdersPage: React.FC = () => {
                   <div className="space-y-3">
                     {selectedOrder.items.map((item, i) => (
                       <div key={i} className="flex gap-4 bg-gray-900/40 rounded-xl p-3 border border-gray-700 items-center">
-                        {item.product && item.product.images && item.product.images.length > 0 ? (
+                        {item.product && Array.isArray(item.product.images) && item.product.images.length > 0 ? (
                           <img
                             src={item.product.images[0].url.startsWith("http") ? item.product.images[0].url : `${BASE_URL}${item.product.images[0].url}`}
                             alt={item.product.name}
@@ -436,7 +406,7 @@ const MyOrdersPage: React.FC = () => {
                 <div className="flex flex-wrap gap-3">
                   {order.items.slice(0, 6).map((item, idx) => (
                     <div key={idx} className="flex items-center gap-3 bg-gray-900/40 rounded-xl px-3 py-2 border border-gray-700">
-                      {item.product && item.product.images && item.product.images.length > 0 ? (
+                      {item.product && Array.isArray(item.product.images) && item.product.images.length > 0 ? (
                         <img
                           src={item.product.images[0].url.startsWith("http") ? item.product.images[0].url : `${BASE_URL}${item.product.images[0].url}`}
                           alt={item.product.name}

@@ -1,140 +1,150 @@
+
+
+
 import { create } from "zustand";
 import axios from "axios";
-import { useAuthStore } from "./authStore";
 
-interface Product {
-  _id: string;
-  name: string;
-  price: number;
-  sellingPrice?: number;
-  images?: { url: string; alt?: string }[];
-}
+const API_URL = `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/v1/order`;
 
-interface OrderItemDetail {
-  product: Product;
+export interface OrderItem {
+  product: any;
   quantity: number;
   serials: string[];
   price: number;
   gstAmount: number;
   shippingCharge: number;
-}
-
-interface User {
-  _id: string;
-  name: string;
-  email: string;
-  role: string;
-}
-
-interface ShippingAddress {
-  fullName: string;
-  phone: string;
-  street: string;
-  city: string;
-  state: string;
-  postalCode: string;
-  country: string;
-}
-
-interface PaymentInfo {
-  method: "COD" | "UPI" | "Card" | "Wallet";
-  status: "Pending" | "Completed" | "Failed";
-  transactionId?: string;
+  status: string;
 }
 
 export interface Order {
   _id: string;
-  user: User;
-  items: OrderItemDetail[];
+  user: any;
+  items: OrderItem[];
   subTotal: number;
   shippingCharges: number;
   gstAmount: number;
   totalAmount: number;
-  payment: PaymentInfo;
-  status: "Processing" | "Shipped" | "Delivered" | "Cancelled";
-  shippingAddress: ShippingAddress;
+  payment: {
+    method: string;
+    status: string;
+    transactionId?: string;
+  };
+  status: string;
+  shippingAddress?: {
+    fullName?: string;
+    phone?: string;
+    street?: string;
+    city?: string;
+    state?: string;
+    postalCode?: string;
+    country?: string;
+  };
   createdAt: string;
-  updatedAt: string;
 }
 
 interface OrderState {
-  userOrders: Order[];
+  orders: Order[];
   allOrders: Order[];
-  singleOrder: Order | null;
+  selectedOrder: Order | null;
   loading: boolean;
   error: string | null;
 
-  fetchUserOrders: () => Promise<void>;
-  fetchAllOrders: () => Promise<void>;
-  fetchOrderById: (id: string) => Promise<void>;
-  clearSingleOrder: () => void;
-  clearError: () => void;
+  // Actions
+  fetchUserOrders: (token: string) => Promise<void>;
+  fetchAllOrders: (token: string) => Promise<void>;
+  fetchOrderById: (id: string, token: string) => Promise<void>;
+  createBrppOrder: (amount: number, userId: string, token: string) => Promise<Order | null>;
+  updateProductStatus: (orderId: string, productId: string, status: string, token: string) => Promise<void>;
 }
 
-const BASE_URL = import.meta.env.VITE_BACKEND_URL
-
-
-export const useOrderStore = create<OrderState>((set) => ({
-  userOrders: [],
+export const useOrderStore = create<OrderState>((set, get) => ({
+  orders: [],
   allOrders: [],
-  singleOrder: null,
+  selectedOrder: null,
   loading: false,
   error: null,
 
-  fetchUserOrders: async () => {
+  // Fetch logged-in user's orders
+  fetchUserOrders: async (token) => {
     try {
       set({ loading: true, error: null });
-      const token = useAuthStore.getState().token;
-
-      const res = await axios.get(`${BASE_URL}/api/v1/order/get-my-order`, {
+      const res = await axios.get(`${API_URL}/get-my-order`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      set({ userOrders: res.data.orders || [], loading: false });
+      set({ orders: res.data.orders, loading: false });
     } catch (err: any) {
-      set({
-        error: err.response?.data?.message || "Failed to fetch user orders",
-        loading: false,
-      });
+      set({ error: err.response?.data?.message || "Failed to fetch orders", loading: false });
     }
   },
 
-  fetchAllOrders: async () => {
+  // Admin: Fetch all orders
+  fetchAllOrders: async (token) => {
     try {
       set({ loading: true, error: null });
-      const token = useAuthStore.getState().token;
-
-      const res = await axios.get(`${BASE_URL}/api/v1/order/all-orders`, {
+      const res = await axios.get(`${API_URL}/all-orders`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      set({ allOrders: res.data.orders || [], loading: false });
+      set({ allOrders: res.data.orders, loading: false });
     } catch (err: any) {
-      set({
-        error: err.response?.data?.message || "Failed to fetch all orders",
-        loading: false,
-      });
+      set({ error: err.response?.data?.message || "Failed to fetch all orders", loading: false });
     }
   },
 
-  fetchOrderById: async (id: string) => {
+  // Fetch single order details
+  fetchOrderById: async (id, token) => {
     try {
       set({ loading: true, error: null });
-      const token = useAuthStore.getState().token;
-
-      const res = await axios.get(`${BASE_URL}/api/v1/order/get-order/${id}`, {
+      const res = await axios.get(`${API_URL}/get-order/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      set({ singleOrder: res.data.order, loading: false });
+      set({ selectedOrder: res.data.order, loading: false });
     } catch (err: any) {
-      set({
-        error: err.response?.data?.message || "Failed to fetch order",
-        loading: false,
-      });
+      set({ error: err.response?.data?.message || "Order not found", loading: false });
     }
   },
 
-  clearSingleOrder: () => set({ singleOrder: null }),
-  clearError: () => set({ error: null }),
+  // Create BRPP order
+  createBrppOrder: async (amount, userId, token) => {
+    try {
+      set({ loading: true, error: null });
+      const res = await axios.post(
+        `${API_URL}/brpp`,
+        { amount, userId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      return res.data;
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || "Failed to create BRPP order", loading: false });
+      return null;
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  // Admin: Update product status
+  updateProductStatus: async (orderId, productId, status, token) => {
+    try {
+      set({ loading: true, error: null });
+      await axios.put(
+        `${API_URL}/${orderId}/product/${productId}/status`,
+        { status },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // update local state
+      const updatedOrders = get().allOrders.map((order) =>
+        order._id === orderId
+          ? {
+              ...order,
+              items: order.items.map((i) =>
+                i.product._id === productId ? { ...i, status } : i
+              ),
+            }
+          : order
+      );
+      set({ allOrders: updatedOrders, loading: false });
+    } catch (err: any) {
+      set({ error: err.response?.data?.message || "Failed to update product status", loading: false });
+    }
+  },
 }));

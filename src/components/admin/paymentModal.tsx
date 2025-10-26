@@ -12,7 +12,7 @@ interface Payment {
   amount: number;
   paymentStatus: string;
   paymentId: string;
-  orderId: string;
+  order: string;
   createdAt: string;
 }
 

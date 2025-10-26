@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Filter, Download, Eye } from 'lucide-react';
+import { Search, Filter, Download, Eye, Loader2 } from 'lucide-react';
 import { useOrderStore } from '@/store/orderStore';
 import { useAuthStore } from '@/store/authStore';
-import OrderModal from '../../components/admin/orderModal'; // import your modal
+import OrderModal from '../../components/admin/orderModal';
 
 export default function Orders() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -14,10 +14,14 @@ export default function Orders() {
   const { token } = useAuthStore();
   const { allOrders, fetchAllOrders, loading, error } = useOrderStore();
 
+  // ✅ Fetch all orders on mount (Admin only)
   useEffect(() => {
-    fetchAllOrders();
-  }, [fetchAllOrders]);
+    if (token) {
+      fetchAllOrders(token);
+    }
+  }, [token, fetchAllOrders]);
 
+  // Modal handlers
   const openModal = (order: any) => {
     setSelectedOrder(order);
     setIsModalOpen(true);
@@ -28,6 +32,7 @@ export default function Orders() {
     setIsModalOpen(false);
   };
 
+  // ✅ Filtered orders based on search & status
   const filteredOrders = allOrders.filter((order) => {
     const orderId = order._id || '';
     const customerName = order.user?.name || '';
@@ -39,6 +44,7 @@ export default function Orders() {
     return matchesSearch && matchesStatus;
   });
 
+  // ✅ Status color mapping
   const getStatusColor = (status: string) => {
     const colors = {
       delivered: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
@@ -50,6 +56,7 @@ export default function Orders() {
     return colors[status.toLowerCase() as keyof typeof colors] || colors.pending;
   };
 
+  // ✅ Count status summary
   const statusCounts = {
     all: allOrders.length,
     pending: allOrders.filter(o => o.status.toLowerCase() === 'pending').length,
@@ -59,6 +66,25 @@ export default function Orders() {
     cancelled: allOrders.filter(o => o.status.toLowerCase() === 'cancelled').length,
   };
 
+  // ✅ Loading or error states
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-80">
+        <Loader2 className="animate-spin text-emerald-600 w-8 h-8" />
+        <p className="ml-3 text-gray-700 dark:text-gray-300">Loading orders...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-8 text-center">
+        <p className="text-red-600 dark:text-red-400 font-medium">{error}</p>
+      </div>
+    );
+  }
+
+  // ✅ Main Render
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
       {/* Header */}
@@ -149,7 +175,7 @@ export default function Orders() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                      {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                      {order?.status || ''}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -180,6 +206,3 @@ export default function Orders() {
     </motion.div>
   );
 }
-
-
-
