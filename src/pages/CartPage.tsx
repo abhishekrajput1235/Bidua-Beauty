@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { ArrowLeft, Plus, Minus, Trash2, ShoppingBag } from "lucide-react";
 import { useCartStore } from "../store/cartStore";
 import { useAuthStore } from "@/store/authStore";
+import {useProductStore} from "@/store/useProductStore";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -21,6 +22,7 @@ interface CartItem {
   units?: { isSold: boolean }[];
 }
 
+const { fetchProducts } = useProductStore.getState();
 const CartPage = () => {
   const { t } = useTranslation();
   const { cart, fetchCart, removeFromCart, incrementCart, decrementCart, loading, error } = useCartStore();
@@ -28,7 +30,8 @@ const CartPage = () => {
 
   useEffect(() => {
     fetchCart();
-  }, [fetchCart]);
+    fetchProducts();
+  }, [fetchCart,fetchProducts]);
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat("en-IN", {
@@ -39,7 +42,7 @@ const CartPage = () => {
 
   // Calculate subtotal based on user role
   const getSubtotal = () =>
-    (cart as CartItem[]).reduce(
+    (cart as unknown as CartItem[]).reduce(
       (acc: number, item: CartItem) =>
         acc +
         (user?.role === "b2b" && item.b2bPrice ? item.b2bPrice : item.sellingPrice) *
@@ -104,7 +107,7 @@ const CartPage = () => {
 
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-4 lg:space-y-6">
-            {(cart as CartItem[])?.map((item: CartItem) => {
+            {(cart as unknown as CartItem[])?.map((item: CartItem) => {
               let availableUnits = 0;
               // Use stock information directly from the cart item, which is populated by the backend.
               // This avoids using stale or incorrect mock data.
@@ -239,7 +242,7 @@ const CartPage = () => {
               <h2 className="text-xl font-bold text-white mb-6">{t("cart.orderSummary")}</h2>
 
               <div className="space-y-3 mb-4">
-                {(cart as CartItem[])?.map((item) => {
+                {(cart as unknown as CartItem[])?.map((item) => {
                   const displayPrice =
                     user?.role === "b2b" && item.b2bPrice ? item.b2bPrice : item.sellingPrice;
                   return (

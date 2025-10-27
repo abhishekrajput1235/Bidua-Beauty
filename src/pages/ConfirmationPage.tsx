@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link,useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { CheckCircle, Package, Truck, Mail, Home, Loader, AlertTriangle } from 'lucide-react';
 import { useOrderStore, Order } from '../store/orderStore';
@@ -8,21 +8,26 @@ import { useAuthStore } from '../store/authStore';
 
 const ConfirmationPage = () => {
   const { t } = useTranslation();
+  const { orderId } = useParams<{ orderId: string }>();
   const token = useAuthStore((s) => s.token);
-  const orders = useOrderStore((s) => s.orders);
-  const fetchUserOrders = useOrderStore((s) => s.fetchUserOrders);
-  const loading = useOrderStore((s) => s.loading);
-  const error = useOrderStore((s) => s.error);
-  const { clearCart } = useCartStore();
+  const { confirmedOrder, clearCart } = useCartStore();
+  const { selectedOrder, loading, error, fetchOrderById } = useOrderStore();
+  const [latestOrder, setLatestOrder] = useState<Order | null>(null);
 
   useEffect(() => {
-    if (token) {
-      fetchUserOrders(token);
+    if (confirmedOrder && confirmedOrder._id === orderId) {
+      setLatestOrder(confirmedOrder);
+    } else if (token && orderId) {
+      fetchOrderById(orderId, token);
     }
     clearCart();
-  }, [fetchUserOrders, clearCart, token]);
+  }, [orderId, confirmedOrder, token, fetchOrderById, clearCart]);
 
-  const latestOrder = (orders && orders.length > 0) ? [...orders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0] : null;
+  useEffect(() => {
+    if (selectedOrder) {
+      setLatestOrder(selectedOrder);
+    }
+  }, [selectedOrder]);
 
   const getEstimatedDelivery = (orderDate: string) => {
     const date = new Date(orderDate);

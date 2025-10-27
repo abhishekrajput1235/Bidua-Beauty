@@ -71,9 +71,9 @@ function App() {
         <Route path="/cost-calculator" element={<CostCalculatorPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
-        <Route path="/confirmation" element={<ConfirmationPage />} />
-        <Route path="/login" element={<LoginPage />} />
+        <Route path="/confirmation/:orderId" element={<ConfirmationPage />} />
         <Route path="/signup" element={<SignupPage />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-pass" element={<ForgotPasswordPage />} />
         <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
         <Route path="/contact-us" element={<ContactUsPage />} />
