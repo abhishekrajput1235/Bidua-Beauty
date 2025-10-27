@@ -29,7 +29,7 @@ export interface Order {
     status: string;
     transactionId?: string;
   };
-  status: string;
+  orderStatus: string;
   shippingAddress?: {
     fullName?: string;
     phone?: string;

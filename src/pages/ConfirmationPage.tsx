@@ -108,13 +108,21 @@ const ConfirmationPage = () => {
     );
   }
 
-  const { _id, shippingAddress, user, createdAt, status } = latestOrder;
+  const { _id, shippingAddress, user, createdAt, orderStatus } = latestOrder;
   const orderNumber = _id.slice(-6);
   const estimatedDelivery = getEstimatedDelivery(createdAt);
 
   const renderOrderStatus = () => {
-    const statuses = ['Processing', 'Shipped', 'Delivered'];
-    const currentStatusIndex = statuses.indexOf(status);
+    const statuses = ['Pending Payment', 'Processing', 'Shipped', 'Delivered'];
+    const currentStatusIndex = statuses.indexOf(orderStatus);
+
+    if (orderStatus === 'Cancelled') {
+      return (
+        <div className="text-center text-red-500 font-bold">
+          Order Cancelled
+        </div>
+      );
+    }
 
     return (
       <div className="flex items-center justify-between relative">
@@ -148,10 +156,10 @@ const ConfirmationPage = () => {
           </div>
 
           <div className="flex flex-col items-center">
-            <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center mb-2 ${status === 'Delivered' ? 'bg-amber-400' : 'bg-gray-700'}`}>
-              <Home className={`w-5 h-5 sm:w-6 sm:h-6 ${status === 'Delivered' ? 'text-black' : 'text-gray-400'}`} />
+            <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center mb-2 ${orderStatus === 'Delivered' ? 'bg-amber-400' : 'bg-gray-700'}`}>
+              <Home className={`w-5 h-5 sm:w-6 sm:h-6 ${orderStatus === 'Delivered' ? 'text-black' : 'text-gray-400'}`} />
             </div>
-            <span className={`font-medium text-xs sm:text-sm text-center ${status === 'Delivered' ? 'text-amber-400' : 'text-gray-400'}`}>{t('confirmation.delivered')}</span>
+            <span className={`font-medium text-xs sm:text-sm text-center ${orderStatus === 'Delivered' ? 'text-amber-400' : 'text-gray-400'}`}>{t('confirmation.delivered')}</span>
           </div>
         </div>
       </div>

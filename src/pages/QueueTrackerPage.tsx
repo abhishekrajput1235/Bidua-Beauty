@@ -5,20 +5,22 @@ import { useAuthStore } from '../store/authStore';
 import { useOrderStore } from '../store/orderStore';
 
 const QueueTrackerPage = () => {
-  const { user, loading: userLoading } = useAuthStore();
+  const { user, token, loading: userLoading } = useAuthStore();
   const { userOrders, fetchUserOrders, loading: ordersLoading } = useOrderStore();
 
   useEffect(() => {
-    if (user) {
-      fetchUserOrders(user._id);
+    if (token) {
+      fetchUserOrders(token);
     }
-  }, [user, fetchUserOrders]);
+  }, [token, fetchUserOrders]);
 
   const isB2B = user?.role === 'b2b';
 
-  const queuedSerials = useMemo(() => {
+  const queuedItems = useMemo(() => {
     if (!userOrders) return [];
-    return userOrders.flatMap(order => order.items.flatMap(item => item.serials || []));
+    return userOrders.flatMap(order => 
+      order.items.filter(item => item.serials && item.serials.length > 0)
+    );
   }, [userOrders]);
 
   if (userLoading || ordersLoading) {
@@ -108,14 +110,24 @@ const QueueTrackerPage = () => {
         <div className="bg-gradient-to-br from-gray-800/50 to-black/50 backdrop-blur-sm border border-gray-700/50 rounded-3xl p-6 lg:p-8 mb-12">
           <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
             <Package className="w-6 h-6 mr-3 text-amber-400" />
-            Your Queued Serial Numbers ({queuedSerials.length})
+            Your Queued Items ({queuedItems.length})
           </h2>
-          {queuedSerials.length > 0 ? (
+          {queuedItems.length > 0 ? (
             <div className="max-h-96 overflow-y-auto pr-2">
-              <ul className="space-y-2 text-gray-300">
-                {queuedSerials.map((serial, index) => (
-                  <li key={index} className="flex justify-between items-center bg-gray-900/50 p-3 rounded-lg border border-gray-700/50">
-                    <span className="font-mono text-amber-400">{serial}</span>
+              <ul className="space-y-4 text-gray-300">
+                {queuedItems.map((item, index) => (
+                  <li key={index} className="bg-gray-900/50 p-4 rounded-lg border border-gray-700/50">
+                    <div className="flex items-center space-x-4">
+                      <img src={item.product.images[0]} alt={item.product.name} className="w-16 h-16 rounded-md object-cover" />
+                      <div>
+                        <p className="font-bold text-white">{item.product.name}</p>
+                        <div className="font-mono text-amber-400 text-sm mt-1">
+                          {item.serials.map(serial => (
+                            <span key={serial} className="block">{serial}</span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
                   </li>
                 ))}
               </ul>
