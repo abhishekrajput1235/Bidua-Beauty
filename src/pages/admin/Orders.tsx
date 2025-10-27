@@ -1,27 +1,28 @@
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { Search, Filter, Download, Eye, Loader2 } from 'lucide-react';
-import { useOrderStore } from '@/store/orderStore';
-import { useAuthStore } from '@/store/authStore';
-import OrderModal from '../../components/admin/orderModal';
+
+
+import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { Search, Filter, Download, Eye, Loader2 } from "lucide-react";
+import { useOrderStore } from "@/store/orderStore";
+import { useAuthStore } from "@/store/authStore";
+import OrderModal from "@/components/admin/orderModal";
 
 export default function Orders() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { token } = useAuthStore();
-  const { allOrders, fetchAllOrders, loading, error } = useOrderStore();
+  const { allOrders = [], fetchAllOrders, loading, error } = useOrderStore();
 
-  // ✅ Fetch all orders on mount (Admin only)
+  // Fetch all orders on mount (Admin only)
   useEffect(() => {
     if (token) {
       fetchAllOrders(token);
     }
   }, [token, fetchAllOrders]);
 
-  // Modal handlers
   const openModal = (order: any) => {
     setSelectedOrder(order);
     setIsModalOpen(true);
@@ -32,41 +33,61 @@ export default function Orders() {
     setIsModalOpen(false);
   };
 
-  // ✅ Filtered orders based on search & status
-  const filteredOrders = allOrders.filter((order) => {
-    const orderId = order._id || '';
-    const customerName = order.user?.name || '';
+  // Normalize incoming orders so UI can safely assume fields exist
+  const normalizedOrders = (allOrders || []).map((o: any) => ({
+    _id: o?._id ?? "",
+    user: { name: o?.user?.name ?? "Guest", ...(o?.user ?? {}) },
+    totalAmount: typeof o?.totalAmount === "number" ? o.totalAmount : 0,
+    createdAt: o?.createdAt ?? null,
+    status: (o?.status ?? "pending").toString(),
+    items: o?.items ?? [],
+    raw: o,
+  }));
+
+  // safe helpers
+  const safeToLower = (v?: any) => (v === undefined || v === null ? "" : String(v).toLowerCase());
+
+  // Filtered orders based on search & status (defensive)
+  const filteredOrders = normalizedOrders.filter((order: any) => {
+    const search = searchTerm.trim().toLowerCase();
+    const orderId = order._id || "";
+    const customerName = order.user?.name || "";
+    const orderStatus = safeToLower(order.status);
+
     const matchesSearch =
-      orderId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customerName.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === 'all' || order.status.toLowerCase() === statusFilter.toLowerCase();
+      (orderId && orderId.toLowerCase().includes(search)) ||
+      (customerName && customerName.toLowerCase().includes(search)) ||
+      (search === ""); // if search empty, match everything
+
+    const matchesStatus = statusFilter === "all" || orderStatus === safeToLower(statusFilter);
+
     return matchesSearch && matchesStatus;
   });
 
-  // ✅ Status color mapping
-  const getStatusColor = (status: string) => {
-    const colors = {
-      delivered: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
-      processing: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-      shipped: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-      pending: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300',
-      cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+  // Status color mapping (safe)
+  const getStatusColor = (status?: string) => {
+    const s = safeToLower(status);
+    const colors: Record<string, string> = {
+      delivered: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+      processing: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+      shipped: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+      pending: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
+      cancelled: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
     };
-    return colors[status.toLowerCase() as keyof typeof colors] || colors.pending;
+    return colors[s] ?? colors.pending;
   };
 
-  // ✅ Count status summary
+  // Count status summary (use normalizedOrders to avoid crashes)
   const statusCounts = {
-    all: allOrders.length,
-    pending: allOrders.filter(o => o.status.toLowerCase() === 'pending').length,
-    processing: allOrders.filter(o => o.status.toLowerCase() === 'processing').length,
-    shipped: allOrders.filter(o => o.status.toLowerCase() === 'shipped').length,
-    delivered: allOrders.filter(o => o.status.toLowerCase() === 'delivered').length,
-    cancelled: allOrders.filter(o => o.status.toLowerCase() === 'cancelled').length,
+    all: normalizedOrders.length,
+    pending: normalizedOrders.filter((o) => safeToLower(o.status) === "pending").length,
+    processing: normalizedOrders.filter((o) => safeToLower(o.status) === "processing").length,
+    shipped: normalizedOrders.filter((o) => safeToLower(o.status) === "shipped").length,
+    delivered: normalizedOrders.filter((o) => safeToLower(o.status) === "delivered").length,
+    cancelled: normalizedOrders.filter((o) => safeToLower(o.status) === "cancelled").length,
   };
 
-  // ✅ Loading or error states
+  // Loading or error states
   if (loading) {
     return (
       <div className="flex items-center justify-center h-80">
@@ -84,7 +105,6 @@ export default function Orders() {
     );
   }
 
-  // ✅ Main Render
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
       {/* Header */}
@@ -107,8 +127,8 @@ export default function Orders() {
             onClick={() => setStatusFilter(status)}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               statusFilter === status
-                ? 'bg-emerald-600 text-white'
-                : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800'
+                ? "bg-emerald-600 text-white"
+                : "bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800"
             }`}
           >
             {status.charAt(0).toUpperCase() + status.slice(1)} ({count})
@@ -152,36 +172,36 @@ export default function Orders() {
             <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
               {filteredOrders.map((order) => (
                 <motion.tr
-                  key={order._id}
+                  key={order._id || Math.random()}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">{order._id}</span>
+                    <span className="text-sm font-medium text-gray-900 dark:text-white">{order._id || "—"}</span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm text-gray-700 dark:text-gray-300">{order.user?.name || 'Guest'}</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">{order.user?.name || "Guest"}</span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                      ₹{order.totalAmount.toLocaleString()}
+                      ₹{order.totalAmount ? order.totalAmount.toLocaleString() : "—"}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className="text-sm text-gray-600 dark:text-gray-400">
-                      {new Date(order.createdAt).toLocaleString()}
+                      {order.createdAt ? new Date(order.createdAt).toLocaleString() : "—"}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                      {order?.status || ''}
+                      {order.status || ""}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <button
                       className="p-2 text-gray-600 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors"
-                      onClick={() => openModal(order)}
+                      onClick={() => openModal(order.raw ?? order)}
                     >
                       <Eye className="w-4 h-4" />
                     </button>
@@ -200,9 +220,7 @@ export default function Orders() {
       </div>
 
       {/* Modal */}
-      {selectedOrder && (
-        <OrderModal order={selectedOrder} isOpen={isModalOpen} onClose={closeModal} />
-      )}
+      {selectedOrder && <OrderModal order={selectedOrder} isOpen={isModalOpen} onClose={closeModal} />}
     </motion.div>
   );
 }
