@@ -1,5 +1,3 @@
-
-
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Search, Filter, Download, Eye, Loader2 } from "lucide-react";
@@ -12,6 +10,10 @@ export default function Orders() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Pagination state: show 20 rows at a time as requested
+  const [currentPage, setCurrentPage] = useState(1);
+  const [ordersPerPage] = useState(6);
 
   const { token } = useAuthStore();
   const { allOrders = [], fetchAllOrders, loading, error } = useOrderStore();
@@ -64,6 +66,22 @@ export default function Orders() {
     return matchesSearch && matchesStatus;
   });
 
+  // If filters/search change, reset to page 1
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, allOrders.length]);
+
+  // Ensure currentPage is within bounds whenever filteredOrders changes
+  const totalPages = Math.max(1, Math.ceil(filteredOrders.length / ordersPerPage));
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(totalPages);
+  }, [currentPage, totalPages]);
+
+  // Pagination slicing
+  const indexOfLast = currentPage * ordersPerPage;
+  const indexOfFirst = indexOfLast - ordersPerPage;
+  const currentOrders = filteredOrders.slice(indexOfFirst, indexOfLast);
+
   // Status color mapping (safe)
   const getStatusColor = (status?: string) => {
     const s = safeToLower(status);
@@ -86,6 +104,55 @@ export default function Orders() {
     delivered: normalizedOrders.filter((o) => safeToLower(o.status) === "delivered").length,
     cancelled: normalizedOrders.filter((o) => safeToLower(o.status) === "cancelled").length,
   };
+
+  // ---------- Truncated pager helpers ----------
+  const PAGINATOR_MAX = 7; // total button slots (including first & last)
+
+  function createPageList(total: number, current: number, maxButtons = PAGINATOR_MAX) {
+    if (total <= maxButtons) return Array.from({ length: total }, (_, i) => i + 1);
+
+    const pages: (number | "LEFT_ELLIPSIS" | "RIGHT_ELLIPSIS")[] = [];
+    const sideWidth = 1; // always show page 1 and page `total`
+    const innerMax = maxButtons - (sideWidth * 2) - 2; // space for first, last and two ellipses
+
+    // compute sliding window
+    let left = Math.max(2, current - Math.floor(innerMax / 2));
+    let right = Math.min(total - 1, current + Math.floor(innerMax / 2));
+
+    // adjust if window is too close to edges
+    const needed = innerMax - (right - left + 1) + 1;
+    if (left === 2 && right < total - 1 && right - left + 1 < innerMax) {
+      right = Math.min(total - 1, right + needed);
+    } else if (right === total - 1 && left > 2 && right - left + 1 < innerMax) {
+      left = Math.max(2, left - needed);
+    }
+
+    pages.push(1);
+
+    if (left > 2) {
+      pages.push("LEFT_ELLIPSIS");
+    } else {
+      for (let p = 2; p < left; p++) pages.push(p);
+    }
+
+    for (let p = left; p <= right; p++) pages.push(p);
+
+    if (right < total - 1) {
+      pages.push("RIGHT_ELLIPSIS");
+    } else {
+      for (let p = right + 1; p < total; p++) pages.push(p);
+    }
+
+    pages.push(total);
+    return pages;
+  }
+
+  function jumpFromEllipsis(current: number, total: number, direction: "left" | "right", maxButtons = PAGINATOR_MAX) {
+    const chunk = Math.max(1, Math.floor((maxButtons - 2) / 2)); // how many pages to jump
+    if (direction === "left") return Math.max(1, current - chunk);
+    return Math.min(total, current + chunk);
+  }
+  // ---------- end pager helpers ----------
 
   // Loading or error states
   if (loading) {
@@ -158,58 +225,80 @@ export default function Orders() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 dark:bg-gray-800/50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Order ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Customer</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Amount</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Date</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
-              {filteredOrders.map((order) => (
-                <motion.tr
-                  key={order._id || Math.random()}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
-                >
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm font-medium text-gray-900 dark:text-white">{order._id || "—"}</span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm text-gray-700 dark:text-gray-300">{order.user?.name || "Guest"}</span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                      ₹{order.totalAmount ? order.totalAmount.toLocaleString() : "—"}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      {order.createdAt ? new Date(order.createdAt).toLocaleString() : "—"}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                      {order.status || ""}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <button
-                      className="p-2 text-gray-600 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors"
-                      onClick={() => openModal(order.raw ?? order)}
-                    >
-                      <Eye className="w-4 h-4" />
-                    </button>
-                  </td>
-                </motion.tr>
-              ))}
-            </tbody>
-          </table>
+<table className="w-full">
+  <thead className="bg-gray-50 dark:bg-gray-800/50">
+    <tr>
+      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+        #
+      </th>
+      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+        Order ID
+      </th>
+      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+        Customer
+      </th>
+      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+        Amount
+      </th>
+      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+        Date
+      </th>
+      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+        Status
+      </th>
+      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+        Actions
+      </th>
+    </tr>
+  </thead>
+
+  <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+    {currentOrders.map((order, index) => (
+      <motion.tr
+        key={order._id || Math.random()}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+      >
+        {/* ✅ Serial number column */}
+        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+          {indexOfFirst + index + 1}
+        </td>
+
+        <td className="px-6 py-4 whitespace-nowrap">
+          <span className="text-sm font-medium text-gray-900 dark:text-white">{order._id || "—"}</span>
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap">
+          <span className="text-sm text-gray-700 dark:text-gray-300">{order.user?.name || "Guest"}</span>
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap">
+          <span className="text-sm font-semibold text-gray-900 dark:text-white">
+            ₹{order.totalAmount ? order.totalAmount.toLocaleString() : "—"}
+          </span>
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap">
+          <span className="text-sm text-gray-600 dark:text-gray-400">
+            {order.createdAt ? new Date(order.createdAt).toLocaleString() : "—"}
+          </span>
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap">
+          <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
+            {order.status || ""}
+          </span>
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap">
+          <button
+            className="p-2 text-gray-600 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-colors"
+            onClick={() => openModal(order.raw ?? order)}
+          >
+            <Eye className="w-4 h-4" />
+          </button>
+        </td>
+      </motion.tr>
+    ))}
+  </tbody>
+</table>
+
         </div>
 
         {filteredOrders.length === 0 && (
@@ -217,6 +306,95 @@ export default function Orders() {
             <p className="text-gray-500 dark:text-gray-400">No orders found matching your criteria.</p>
           </div>
         )}
+      </div>
+
+      {/* Pagination (truncated pager) */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          {filteredOrders.length === 0 ? (
+            <>Showing 0 of 0 orders</>
+          ) : (
+            <>Showing {indexOfFirst + 1} - {Math.min(indexOfLast, filteredOrders.length)} of {filteredOrders.length} orders</>
+          )}
+        </div>
+
+        <nav className="flex items-center gap-2" aria-label="Pagination">
+          <button
+            onClick={() => setCurrentPage(1)}
+            disabled={currentPage === 1}
+            className="px-3 py-2 rounded-md border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 disabled:opacity-50"
+            title="First"
+          >
+            {"<<"}
+          </button>
+
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className="px-3 py-2 rounded-md border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 disabled:opacity-50"
+          >
+            Prev
+          </button>
+
+          <div className="flex gap-1 items-center">
+            {createPageList(totalPages, currentPage).map((item, i) => {
+              if (item === "LEFT_ELLIPSIS")
+                return (
+                  <button
+                    key={`le-${i}`}
+                    onClick={() => setCurrentPage(jumpFromEllipsis(currentPage, totalPages, "left"))}
+                    className="px-3 py-2 rounded-md text-sm font-medium bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800"
+                    title="Jump back"
+                  >
+                    ...
+                  </button>
+                );
+              if (item === "RIGHT_ELLIPSIS")
+                return (
+                  <button
+                    key={`re-${i}`}
+                    onClick={() => setCurrentPage(jumpFromEllipsis(currentPage, totalPages, "right"))}
+                    className="px-3 py-2 rounded-md text-sm font-medium bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800"
+                    title="Jump forward"
+                  >
+                    ...
+                  </button>
+                );
+
+              const num = item as number;
+              return (
+                <button
+                  key={num}
+                  onClick={() => setCurrentPage(num)}
+                  className={`px-3 py-2 rounded-md text-sm font-medium ${
+                    currentPage === num
+                      ? "bg-emerald-600 text-white"
+                      : "bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800"
+                  }`}
+                >
+                  {num}
+                </button>
+              );
+            })}
+          </div>
+
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className="px-3 py-2 rounded-md border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 disabled:opacity-50"
+          >
+            Next
+          </button>
+
+          <button
+            onClick={() => setCurrentPage(totalPages)}
+            disabled={currentPage === totalPages}
+            className="px-3 py-2 rounded-md border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 disabled:opacity-50"
+            title="Last"
+          >
+            {">>"}
+          </button>
+        </nav>
       </div>
 
       {/* Modal */}
