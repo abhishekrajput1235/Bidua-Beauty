@@ -1,10 +1,12 @@
 // src/store/b2bProfile.ts
-import {create} from "zustand";
+import { create } from "zustand";
 import axios, { AxiosError } from "axios";
+import { useAuthStore } from "./authStore";
 
 /**
  * Types
  */
+
 export interface SubscriptionPayment {
   razorpayOrderId?: string;
   razorpayPaymentId?: string;
@@ -37,7 +39,7 @@ export interface RazorpayOrder {
   amount: number;
   currency: string;
   receipt?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface PaymentRecord {
@@ -68,6 +70,7 @@ interface BusinessProfileStore {
   currentProfile: BusinessProfile | null;
   razorpayOrder: RazorpayOrder | null;
   paymentRecord: PaymentRecord | null;
+  businessData: Omit<BusinessProfile, "_id" | "user"> | null;
 
   // status
   loading: boolean;
@@ -75,11 +78,13 @@ interface BusinessProfileStore {
   successMessage: string | null;
 
   // actions
+  setBusinessData: (data: Omit<BusinessProfile, "_id" | "user">) => void;
   createProfile: (data: Omit<BusinessProfile, "_id" | "user">) => Promise<{ razorpayOrder?: RazorpayOrder; paymentRecord?: PaymentRecord } | void>;
   verifyPayment: (payload: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string; businessProfileId: string; }) => Promise<void>;
   getAllProfiles: () => Promise<void>;
   getProfileById: (id: string) => Promise<void>;
   getMyProfile: () => Promise<void>;
+
   updateProfile: (id: string, data: Partial<BusinessProfile>) => Promise<void>;
   deleteProfile: (id: string) => Promise<void>;
   clearError: () => void;
@@ -92,18 +97,18 @@ interface BusinessProfileStore {
 const API_BASE = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/b2b` : "http://localhost:5000/api/v1/b2b";
 
 /**
- * Axios instance (minimal). It will add Authorization header if localStorage.token is present.
- * You can override to use your auth store token instead.
+ * Axios instance (minimal). It will add Authorization header using token from authStore.
  */
 const axiosInstance = axios.create({
   baseURL: API_BASE,
   timeout: 20_000,
 });
 
-// Request interceptor to attach token if available
+// Request interceptor to attach token from authStore if available.
+// Using useAuthStore.getState() ensures we always get the latest token (no stale closure).
 axiosInstance.interceptors.request.use((config) => {
   try {
-    const token = localStorage.getItem("token");
+    const { token } = useAuthStore.getState();
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -135,12 +140,14 @@ export const useBusinessProfileStore = create<BusinessProfileStore>((set, get) =
   currentProfile: null,
   razorpayOrder: null,
   paymentRecord: null,
+  businessData: null,
 
   loading: false,
   error: null,
   successMessage: null,
 
   // actions
+  setBusinessData: (data) => set({ businessData: data }),
   createProfile: async (data) => {
     set({ loading: true, error: null, successMessage: null });
     try {

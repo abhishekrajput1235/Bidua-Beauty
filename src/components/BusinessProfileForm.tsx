@@ -1,23 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { Save, CreditCard, X } from "lucide-react";
-
-type BusinessProfile = {
-  _id?: string;
-  businessName?: string;
-  ownerName?: string;
-  phone?: string;
-  email?: string;
-  address?: string;
-  gstNumber?: string | null;
-  [key: string]: any;
-};
+import { useBusinessProfileStore, BusinessProfile } from "../store/b2bProfile";
 
 type Props = {
   initialData?: BusinessProfile;
-  onSubmit: (data: BusinessProfile) => Promise<any> | any;
-  onPaymentSubmit?: (paymentResult: any) => Promise<any> | any;
   onCancel?: () => void;
+  onSubmit: (data: Partial<BusinessProfile>) => void;
+  onPaymentSubmit: () => void;
   submitLabel?: string;
 };
 
@@ -25,29 +15,30 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phoneRegex = /^[0-9]{10}$/;
 
 const BusinessProfileForm: React.FC<Props> = ({
-  initialData = {},
+  initialData = {} as BusinessProfile,
+  onCancel,
   onSubmit,
   onPaymentSubmit,
-  onCancel,
-  submitLabel = "Save & Continue",
+  submitLabel = "Save Profile",
 }) => {
-  // Initialize form once, or when editing a different profile (based on _id)
-  const [form, setForm] = useState<BusinessProfile>(() => ({
-    businessName: initialData?.businessName ?? "",
-    ownerName: initialData?.ownerName ?? "",
-    phone: initialData?.phone ?? "",
-    email: initialData?.email ?? "",
-    address: initialData?.address ?? "",
-    gstNumber: initialData?.gstNumber ?? "",
-  }));
+  const {
+    loading,
+    error,
+    successMessage,
+    resetStatus,
+  } = useBusinessProfileStore();
 
-  const [loading, setLoading] = useState(false);
-  const [paymentProcessing, setPaymentProcessing] = useState(false);
+  const [form, setForm] = useState<Partial<BusinessProfile>>({
+    businessName: initialData.businessName ?? "",
+    ownerName: initialData.ownerName ?? "",
+    phone: initialData.phone ?? "",
+    email: initialData.email ?? "",
+    address: initialData.address ?? "",
+    gstNumber: initialData.gstNumber ?? "",
+  });
 
-  // Only reset form if the profile _id changes (safe guard against parent re-creating initialData object)
   useEffect(() => {
-    const id = initialData?._id ?? null;
-    if (id) {
+    if (initialData._id) {
       setForm({
         businessName: initialData.businessName ?? "",
         ownerName: initialData.ownerName ?? "",
@@ -57,12 +48,18 @@ const BusinessProfileForm: React.FC<Props> = ({
         gstNumber: initialData.gstNumber ?? "",
       });
     }
-    // If you want to prefill on first mount when initialData has values but no _id,
-    // you can uncomment the block below:
-    // else if (!id && Object.keys(initialData || {}).length) {
-    //   setForm({...});
-    // }
-  }, [initialData?._id]); // <<-- depends only on _id, not whole object
+  }, [initialData]);
+
+  useEffect(() => {
+    if (successMessage) {
+      toast.success(successMessage);
+      resetStatus();
+    }
+    if (error) {
+      toast.error(error);
+      resetStatus();
+    }
+  }, [successMessage, error, resetStatus]);
 
   const handleChange = (key: string, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -81,98 +78,44 @@ const BusinessProfileForm: React.FC<Props> = ({
 
   const handleSave = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    const err = validate();
-    if (err) {
-      toast.error(err);
-      return null;
-    }
-
-    try {
-      setLoading(true);
-      const result = await onSubmit({ ...form });
-      setLoading(false);
-      return result;
-    } catch (error: any) {
-      setLoading(false);
-      console.error("BusinessProfileForm submit error:", error);
-      toast.error(error?.message || "Failed to save profile.");
-      throw error;
-    }
-  };
-
-  /**
-   * Simulated payment flow:
-   * - Save profile first (calls onSubmit)
-   * - Simulate payment result and call onPaymentSubmit if provided
-   *
-   * Replace with real Razorpay flow when ready.
-   */
-  const handleSimulatedPayment = async () => {
-    const err = validate();
-    if (err) {
-      toast.error(err);
+    const validationError = validate();
+    if (validationError) {
+      toast.error(validationError);
       return;
     }
+    onSubmit(form);
+  };
 
-    try {
-      setPaymentProcessing(true);
-
-      // Ensure profile saved first
-      const saved = await handleSave();
-      // small delay to simulate checkout
-      await new Promise((r) => setTimeout(r, 700));
-
-      const simulatedPayment = {
-        razorpay_order_id: `order_${Date.now()}`,
-        razorpay_payment_id: `pay_${Math.random().toString(36).slice(2, 10)}`,
-        razorpay_signature: "simulated_signature_hash",
-        businessProfileId: saved?.data?._id ?? saved?._id ?? initialData?._id ?? null,
-        raw: { amount: 4999, currency: "INR" },
-      };
-
-      if (typeof onPaymentSubmit === "function") {
-        try {
-          await onPaymentSubmit(simulatedPayment);
-          toast.success("Payment simulated & submitted successfully.");
-        } catch (err: any) {
-          console.error("onPaymentSubmit error:", err);
-          toast.error(err?.message || "Payment verification failed.");
-        }
-      } else {
-        toast.info("Payment simulated locally (no onPaymentSubmit provided).");
-      }
-    } catch (err: any) {
-      console.error("Simulated payment failed:", err);
-      toast.error(err?.message || "Payment failed.");
-    } finally {
-      setPaymentProcessing(false);
+  const handlePayment = async () => {
+    const validationError = validate();
+    if (validationError) {
+      toast.error(validationError);
+      return;
     }
+    onSubmit(form);
+    onPaymentSubmit();
   };
 
   return (
     <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        handleSave();
-      }}
+      onSubmit={handleSave}
       className="bg-gradient-to-br from-gray-900/30 to-black/40 border border-gray-700/40 rounded-2xl p-6 space-y-6"
     >
       <div className="flex items-center justify-between">
         <h3 className="text-xl font-semibold text-white">Business Profile</h3>
-        <div className="flex items-center gap-2">
-          {onCancel && (
-            <button
-              type="button"
-              onClick={onCancel}
-              className="inline-flex items-center gap-2 text-sm text-gray-300 hover:text-white"
-            >
-              <X className="w-4 h-4" /> Cancel
-            </button>
-          )}
-        </div>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="inline-flex items-center gap-2 text-sm text-gray-300 hover:text-white"
+          >
+            <X className="w-4 h-4" /> Cancel
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Input fields remain the same, just ensure they use the local `form` state */}
         <label className="block">
           <span className="text-sm text-gray-300">Business Name *</span>
           <input
@@ -247,33 +190,47 @@ const BusinessProfileForm: React.FC<Props> = ({
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 justify-end">
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={loading || paymentProcessing}
-          className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black rounded-full px-5 py-2 font-semibold shadow-md"
-        >
-          <Save className="w-4 h-4" /> {loading ? "Saving..." : submitLabel}
-        </button>
+        {!initialData._id && (
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={loading}
+            className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black rounded-full px-5 py-2 font-semibold shadow-md"
+          >
+            <Save className="w-4 h-4" /> {loading ? "Saving..." : submitLabel}
+          </button>
+        )}
 
-        <button
-          type="button"
-          onClick={handleSimulatedPayment}
-          disabled={paymentProcessing || loading}
-          className="inline-flex items-center gap-2 border border-amber-400 text-amber-400 rounded-full px-5 py-2 font-semibold hover:bg-amber-400/10"
-          title="Simulate payment (replace with real checkout)"
-        >
-          <CreditCard className="w-4 h-4" />
-          {paymentProcessing ? "Processing..." : "Pay ₹4,999 (Simulate)"}
-        </button>
+        {initialData._id ? (
+          <button
+            type="submit"
+            disabled={loading}
+            className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-black rounded-full px-5 py-2 font-semibold shadow-md"
+          >
+            <Save className="w-4 h-4" /> {loading ? "Updating..." : "Update Profile"}
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={handlePayment}
+            disabled={loading}
+            className="inline-flex items-center gap-2 border border-amber-400 text-amber-400 rounded-full px-5 py-2 font-semibold hover:bg-amber-400/10"
+          >
+            <CreditCard className="w-4 h-4" />
+            {loading ? "Processing..." : "Join & Pay ₹4,999"}
+          </button>
+        )}
       </div>
-
-      <p className="text-xs text-gray-400 mt-2">
-        Note: This form currently simulates payment. Replace the simulated payment handler with your Razorpay flow:
-        1) call server to create order, 2) open Razorpay checkout, 3) call verification endpoint with signature.
-      </p>
     </form>
   );
 };
 
 export default BusinessProfileForm;
+
+// Add Razorpay script to your index.html head:
+// <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+// Also, declare Razorpay on the window object in a .d.ts file (e.g., vite-env.d.ts)
+// interface Window {
+//   Razorpay: any;
+// }
