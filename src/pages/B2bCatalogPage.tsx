@@ -24,6 +24,7 @@ const B2bCatalogPage: React.FC = () => {
   }, [error]);
 
   const isB2B = user?.role === 'b2b';
+  console.log("User role:", user?.role, "isB2B:", isB2B);
 
   const computeAvailableUnits = (product: any): number => {
     if (Array.isArray(product.units) && product.units.length > 0) {

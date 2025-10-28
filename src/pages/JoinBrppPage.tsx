@@ -42,7 +42,8 @@ const JoinBrppPage: React.FC = () => {
     if (!businessData) return toast.error("Please fill business details first.");
 
     try {
-      await createProfile(businessData);
+      const result = await createProfile(businessData);
+      const razorpayOrder = result?.razorpayOrder;
 
       if (!razorpayOrder) {
         toast.error("Unable to generate payment order.");

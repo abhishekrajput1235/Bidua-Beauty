@@ -36,8 +36,7 @@ export const useRazorpayStore = create<RazorpayStore>((set, get) => ({
     if (!order) return;
 
     const options = {
-      key: process.env.REACT_APP_RAZORPAY_KEY_ID,
-      amount: order.amount,
+                key: import.meta.env.VITE_RAZORPAY_KEY_ID,      amount: order.amount,
       currency: order.currency,
       order_id: order.id,
       handler: async function (response: any) {
