@@ -55,6 +55,7 @@ const ProductsPage = () => {
       const success = await addToCart(product.productId, qty);
 
       if (success) {
+        alert("Item added to cart successfully.");
         toast.success("Item added successfully.", { position: "top-right", autoClose: 3000 });
       }
     } catch (error: any) {

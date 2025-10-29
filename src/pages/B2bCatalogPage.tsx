@@ -145,6 +145,12 @@ const B2bCatalogPage: React.FC = () => {
         <p className="text-gray-300 text-sm sm:text-base lg:text-lg max-w-xl mx-auto">Exclusive wholesale pricing for business partners</p>
       </div>
 
+      {isB2B && (
+        <div className="bg-blue-500/10 border border-blue-500/30 text-blue-300 p-4 rounded-2xl text-center mb-8">
+          <p className="font-semibold">Please note: A minimum order value of ₹20,000 is required for all B2B purchases.</p>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
         {products.map((product: any) => {
           const availableUnits = computeAvailableUnits(product);

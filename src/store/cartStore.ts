@@ -220,7 +220,7 @@ export const useCartStore = create<CartState>((set, get) => ({
                   };
 
                   const verificationResponse = await axios.post(
-                    `${API_URL}/payment/verify-payment`,
+                    `${API_URL}/order/verify-payment`,
                     data,
                     { headers: { Authorization: `Bearer ${token}` } }
                   );

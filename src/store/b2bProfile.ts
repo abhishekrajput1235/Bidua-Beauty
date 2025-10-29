@@ -174,6 +174,7 @@ export const useBusinessProfileStore = create<BusinessProfileStore>((set, get) =
       if (body.message) set({ successMessage: body.message });
 
       return {
+        businessProfile: body.businessProfile,
         razorpayOrder: body.razorpayOrder,
         paymentRecord: body.paymentRecord,
       };
