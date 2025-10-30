@@ -1,12 +1,13 @@
-import React, { useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowLeft, ListOrdered, Package, User, LogIn } from 'lucide-react';
-import { useAuthStore } from '../store/authStore';
-import { useOrderStore } from '../store/orderStore';
+import React, { useEffect, useMemo } from "react";
+import { Link } from "react-router-dom";
+import { ArrowLeft, ListOrdered, Package, User, LogIn } from "lucide-react";
+import { useAuthStore } from "../store/authStore";
+import { useOrderStore } from "../store/orderStore";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const QueueTrackerPage = () => {
   const { user, token, loading: userLoading } = useAuthStore();
-  const { userOrders, fetchUserOrders, loading: ordersLoading } = useOrderStore();
+  const { orders, fetchUserOrders, loading: ordersLoading } = useOrderStore();
 
   useEffect(() => {
     if (token) {
@@ -14,21 +15,23 @@ const QueueTrackerPage = () => {
     }
   }, [token, fetchUserOrders]);
 
-  const isB2B = user?.role === 'b2b';
+  const isB2B = user?.role === "b2b";
 
   const queuedItems = useMemo(() => {
-    if (!userOrders) return [];
-    return userOrders.flatMap(order => 
-      order.items.filter(item => item.serials && item.serials.length > 0)
+    if (!orders) return [];
+    return orders.flatMap((order) =>
+      order.items.filter((item) => item.serials && item.serials.length > 0)
     );
-  }, [userOrders]);
+  }, [orders]);
 
   if (userLoading || ordersLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center px-4 py-16">
         <div className="text-center">
           <ListOrdered className="w-24 h-24 text-gray-600 mx-auto mb-8 animate-pulse" />
-          <h1 className="text-4xl font-bold text-white mb-4">Loading Queue...</h1>
+          <h1 className="text-4xl font-bold text-white mb-4">
+            Loading Queue...
+          </h1>
         </div>
       </div>
     );
@@ -40,16 +43,18 @@ const QueueTrackerPage = () => {
         <div className="text-center max-w-md">
           <LogIn className="w-24 h-24 text-gray-600 mx-auto mb-8" />
           <h1 className="text-4xl font-bold text-white mb-4">Login Required</h1>
-          <p className="text-gray-400 mb-8 text-lg">Please log in or sign up to view the Queue Tracker.</p>
+          <p className="text-gray-400 mb-8 text-lg">
+            Please log in or sign up to view the Queue Tracker.
+          </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Link 
-              to="/login" 
+            <Link
+              to="/login"
               className="bg-gradient-to-r from-amber-400 to-yellow-500 text-black px-8 py-4 rounded-full font-bold text-lg hover:shadow-2xl hover:shadow-amber-400/30 transition-all duration-300 transform hover:scale-105"
             >
               Login
             </Link>
-            <Link 
-              to="/signup" 
+            <Link
+              to="/signup"
               className="border-2 border-amber-400/50 text-amber-400 px-8 py-4 rounded-full font-bold text-lg hover:border-amber-400 hover:bg-amber-400/10 transition-all duration-300"
             >
               Sign Up
@@ -62,20 +67,27 @@ const QueueTrackerPage = () => {
 
   if (!isB2B) {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center px-4 py-16">
-            <div className="text-center max-w-md">
-                <User className="w-24 h-24 text-gray-600 mx-auto mb-8" />
-                <h1 className="text-4xl font-bold text-white mb-4">B2B Access Only</h1>
-                <p className="text-gray-400 mb-8 text-lg">This page is exclusively for B2B users.</p>
-                <Link 
-                    to="/"
-                    className="inline-flex items-center space-x-2 text-amber-400 hover:text-amber-300 transition-colors duration-300 mb-12 group"
-                >
-                    <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform duration-300" />
-                    <span>Back to Home</span>
-                </Link>
-            </div>
+      <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black flex items-center justify-center px-4 py-16">
+        <div className="text-center max-w-md">
+          <User className="w-24 h-24 text-gray-600 mx-auto mb-8" />
+          <h1 className="text-4xl font-bold text-white mb-4">
+            B2B Access Only
+          </h1>
+          <p className="text-gray-400 mb-8 text-lg">
+            This page is exclusively for B2B users.
+          </p>
+          <Link
+            to="/"
+            className="inline-flex items-center space-x-2 text-amber-400 hover:text-amber-300 transition-colors duration-300 mb-12 group"
+          >
+            <ArrowLeft
+              size={20}
+              className="group-hover:-translate-x-1 transition-transform duration-300"
+            />
+            <span>Back to Home</span>
+          </Link>
         </div>
+      </div>
     );
   }
 
@@ -87,11 +99,14 @@ const QueueTrackerPage = () => {
       </div>
 
       <div className="container mx-auto max-w-6xl relative z-10">
-        <Link 
+        <Link
           to="/"
           className="inline-flex items-center space-x-2 text-amber-400 hover:text-amber-300 transition-colors duration-300 mb-12 group"
         >
-          <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform duration-300" />
+          <ArrowLeft
+            size={20}
+            className="group-hover:-translate-x-1 transition-transform duration-300"
+          />
           <span>Back to Home</span>
         </Link>
 
@@ -116,14 +131,31 @@ const QueueTrackerPage = () => {
             <div className="max-h-96 overflow-y-auto pr-2">
               <ul className="space-y-4 text-gray-300">
                 {queuedItems.map((item, index) => (
-                  <li key={index} className="bg-gray-900/50 p-4 rounded-lg border border-gray-700/50">
+                  <li
+                    key={index}
+                    className="bg-gray-900/50 p-4 rounded-lg border border-gray-700/50"
+                  >
                     <div className="flex items-center space-x-4">
-                      <img src={item.product.images[0]} alt={item.product.name} className="w-16 h-16 rounded-md object-cover" />
+                      
+
+<img
+  src={
+    item.product.images[0].url.startsWith("http")
+      ? item.product.images[0].url
+      : `${BACKEND_URL}${item.product.images[0].url}`
+  }
+  alt={item.product.images[0].name}
+  className="w-16 h-16 rounded-md object-cover"
+/>
                       <div>
-                        <p className="font-bold text-white">{item.product.name}</p>
+                        <p className="font-bold text-white">
+                          {item.product.name}
+                        </p>
                         <div className="font-mono text-amber-400 text-sm mt-1">
-                          {item.serials.map(serial => (
-                            <span key={serial} className="block">{serial}</span>
+                          {item.serials.map((serial) => (
+                            <span key={serial} className="block">
+                              {serial}
+                            </span>
                           ))}
                         </div>
                       </div>
@@ -135,18 +167,38 @@ const QueueTrackerPage = () => {
           ) : (
             <div className="text-center py-12">
               <Package className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-              <p className="text-gray-400 text-lg">You have no products in the queue.</p>
+              <p className="text-gray-400 text-lg">
+                You have no products in the queue.
+              </p>
             </div>
           )}
         </div>
 
         <div className="mt-12 bg-gradient-to-br from-gray-800/50 to-black/50 backdrop-blur-sm border border-gray-700/50 rounded-3xl p-6 lg:p-8">
-          <h3 className="text-xl font-bold text-white mb-4">How the Queue System Works</h3>
+          <h3 className="text-xl font-bold text-white mb-4">
+            How the Queue System Works
+          </h3>
           <div className="space-y-3 text-gray-300 text-sm leading-relaxed">
-            <p><strong className="text-amber-400">FIFO System:</strong> Stock is allocated on a First-In-First-Out basis. Earlier orders get priority.</p>
-            <p><strong className="text-amber-400">Serial Allocation:</strong> Each product has a unique serial number. Your order is assigned specific serial ranges.</p>
-            <p><strong className="text-amber-400">B2C Sales Impact:</strong> When B2C customers buy products with your allocated serials, you earn profit share.</p>
-            <p><strong className="text-amber-400">Profit Sharing:</strong> You receive 60% of profit + full cost reimbursement when your serials are sold.</p>
+            <p>
+              <strong className="text-amber-400">FIFO System:</strong> Stock is
+              allocated on a First-In-First-Out basis. Earlier orders get
+              priority.
+            </p>
+            <p>
+              <strong className="text-amber-400">Serial Allocation:</strong>{" "}
+              Each product has a unique serial number. Your order is assigned
+              specific serial ranges.
+            </p>
+            <p>
+              <strong className="text-amber-400">B2C Sales Impact:</strong> When
+              B2C customers buy products with your allocated serials, you earn
+              profit share.
+            </p>
+            <p>
+              <strong className="text-amber-400">Profit Sharing:</strong> You
+              receive 60% of profit + full cost reimbursement when your serials
+              are sold.
+            </p>
           </div>
         </div>
       </div>
