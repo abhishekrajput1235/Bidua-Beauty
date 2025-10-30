@@ -8,6 +8,7 @@ import {
   Settings,
   Menu,
   X,
+  Home,
 } from "lucide-react";
 import { useTheme } from "../admincontexts/ThemeContext";
 
@@ -24,6 +25,9 @@ const AdminLayout = () => {
     { name: "Analytics", path: "/admin/analytics", icon: BarChart3 },
     { name: "Settings", path: "/admin/settings", icon: Settings },
   ];
+  const HomeHandler=()=>{
+    window.location.href="/";
+  }
 
   return (
     <div
@@ -38,7 +42,7 @@ const AdminLayout = () => {
         } fixed inset-y-0 left-0 w-64 transform bg-white dark:bg-gray-800 border-r dark:border-gray-700 transition-transform duration-200 ease-in-out z-40 md:translate-x-0`}
       >
         <div className="flex items-center justify-between px-4 py-4 border-b dark:border-gray-700">
-          <h2 className="text-lg font-semibold">Admin Panel</h2>
+          <h2 className="text-lg font-semibold"><button onClick={HomeHandler} className="flex justify-center items-center gap-2"><div><Home/></div><div>Bidua Beauty</div></button></h2>
           <button className="md:hidden" onClick={() => setIsOpen(false)}>
             <X size={22} />
           </button>

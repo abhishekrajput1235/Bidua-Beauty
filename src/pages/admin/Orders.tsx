@@ -35,8 +35,9 @@ export default function Orders() {
     setIsModalOpen(false);
   };
 
-  // Normalize incoming orders so UI can safely assume fields exist
-  const normalizedOrders = (allOrders || []).map((o: any) => ({
+// Normalize incoming orders so UI can safely assume fields exist
+const normalizedOrders = (allOrders || [])
+  .map((o: any) => ({
     _id: o?._id ?? "",
     user: { name: o?.user?.name ?? "Guest", ...(o?.user ?? {}) },
     totalAmount: typeof o?.totalAmount === "number" ? o.totalAmount : 0,
@@ -44,7 +45,14 @@ export default function Orders() {
     status: (o?.status ?? "pending").toString(),
     items: o?.items ?? [],
     raw: o,
-  }));
+  }))
+  // sort newest first (robust against missing/invalid dates)
+  .sort((a, b) => {
+    const ta = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const tb = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return tb - ta; // descending -> newest first
+  });
+
 
   // safe helpers
   const safeToLower = (v?: any) => (v === undefined || v === null ? "" : String(v).toLowerCase());

@@ -39,7 +39,7 @@ export default function Dashboard() {
     if (user?.role === 'admin') {
       fetchUsers();
     }
-  }, [fetchAllOrders, fetchProducts, getAllUsers, user]);
+  }, [fetchAllOrders, fetchProducts, getAllUsers, user,]);
 
   const totalRevenue = useMemo(() => allOrders.reduce((sum, order) => sum + order.totalAmount, 0), [allOrders]);
   const totalOrders = allOrders.length;

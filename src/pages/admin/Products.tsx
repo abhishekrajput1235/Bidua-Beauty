@@ -183,7 +183,7 @@ export default function Products() {
                       {product.category}
                     </td>
                     <td className="px-4 py-2 whitespace-nowrap text-gray-900 dark:text-white font-semibold">
-                      ${product.price}
+                      ₹{product.price}
                     </td>
                     <td
                       className={`px-4 py-2 whitespace-nowrap ${

@@ -210,7 +210,7 @@ export default function UpdateProductModal({
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="Product Name *"
-                className="w-full px-4 py-2 border rounded-lg"
+                className="w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
               />
               <textarea
                 name="description"
@@ -218,7 +218,7 @@ export default function UpdateProductModal({
                 onChange={handleChange}
                 placeholder="Description"
                 rows={3}
-                className="w-full px-4 py-2 border rounded-lg"
+                className="w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
               />
 
               <div className="grid grid-cols-2 gap-4">
@@ -227,14 +227,14 @@ export default function UpdateProductModal({
                   value={formData.category}
                   onChange={handleChange}
                   placeholder="Category"
-                  className="w-full px-4 py-2 border rounded-lg"
+                  className="w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 />
                 <input
                   name="brand"
                   value={formData.brand}
                   onChange={handleChange}
                   placeholder="Brand"
-                  className="w-full px-4 py-2 border rounded-lg"
+                  className="w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                 />
               </div>
 
@@ -249,7 +249,7 @@ export default function UpdateProductModal({
                       .replace(/([A-Z])/g, " $1")
                       .replace(/^./, (str) => str.toUpperCase())}
                     type="number"
-                    className="w-full px-4 py-2 border rounded-lg"
+                    className="w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                   />
                 ))}
               </div>
@@ -269,7 +269,7 @@ export default function UpdateProductModal({
                 value={formData.tags}
                 onChange={handleChange}
                 placeholder="Tags (comma separated)"
-                className="w-full px-4 py-2 border rounded-lg"
+                className="w-full px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
               />
 
               {/* Image Upload */}
