@@ -57,19 +57,26 @@ const ConfirmationPage = () => {
     return `
       BIDUA Beauty - Order Receipt
       ==============================
-      Order Number: #${order._id.slice(-6)}
+      Order Number: #${order._id}
       Order Date: ${new Date(order.createdAt).toLocaleDateString('en-IN')}
       
       Customer:
       - Name: ${order.shippingAddress?.fullName || 'N/A'}
-      - Email: ${order.user.email}
+      - Email: ${order.user?.email || 'N/A'}
       - Phone: ${order.shippingAddress?.phone || 'N/A'}
 
       Shipping Address:
       - ${address}
 
       Items:
-      ${order.items.map(item => `- ${item.product ? item.product.name : 'Product not available'} (x ${item.quantity}) - ${formatPrice(item.price * item.quantity)}`).join('\n')}
+      ${order.items.map(item => {
+        const productName = item.product ? item.product.name : 'Product not available';
+        const productSKU = item.product && item.product.productId ? ` (SKU: ${item.product.productId})` : '';
+        return `  - ${productName}${productSKU}
+    - Quantity: ${item.quantity}
+    - Unit Price: ${formatPrice(item.price)}
+    - Total: ${formatPrice(item.price * item.quantity)}`;
+      }).join('\n\n')}
 
       Subtotal: ${formatPrice(order.subTotal)}
       Shipping: ${formatPrice(order.shippingCharges)}

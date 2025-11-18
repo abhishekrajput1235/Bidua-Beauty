@@ -3,7 +3,7 @@ import { create } from "zustand";
 import axios from "axios";
 
 // const API_URL = "https://backend.biduabeauty.com/api/v1/products";
-const API_URL = "http://localhost:5000/api/v1/products";
+const API_URL = `${import.meta.env.VITE_BACKEND_URL}/api/v1/products`;
 
 interface Unit {
   serial: string;

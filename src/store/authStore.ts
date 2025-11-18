@@ -3,7 +3,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import axios from "axios";
 import { JSX } from "react/jsx-runtime";
 
-const API_URL = "http://localhost:5000/api/v1";
+const API_URL = `${import.meta.env.VITE_BACKEND_URL}/api/v1`;
 
 interface User {
   [x: string]: any;

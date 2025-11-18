@@ -1,7 +1,8 @@
 import { create } from "zustand";
 import axios from "axios";
 import { useAuthStore } from "./authStore";
-
+const API_URL = `${import.meta.env.VITE_BACKEND_URL}/api/v1`;
+  
 // Interfaces
 interface CartItem {
   [x: string]: any; // To allow for flexible properties
@@ -59,7 +60,7 @@ interface CartState {
   createOrderAndProcessPayment: () => Promise<any | null>;
 }
 
-const API_URL = "http://localhost:5000/api/v1";
+
 
 export const useCartStore = create<CartState>((set, get) => ({
   cart: [],

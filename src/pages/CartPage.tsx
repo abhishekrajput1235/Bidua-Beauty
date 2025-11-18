@@ -274,7 +274,7 @@ const CartPage = () => {
                 </div>
               </div>
 
-              {user?.role === "b2b" && getSubtotal() < 20000 && (
+              {user?.role === "b2b" && getSubtotal() < 2000 && (
                 <div className="bg-red-500/10 border border-red-500/30 text-red-300 p-3 rounded-xl text-center mb-4">
                   <p className="font-semibold text-sm">A minimum order of ₹20,000 is required for B2B users.</p>
                 </div>
@@ -283,12 +283,12 @@ const CartPage = () => {
               <Link
                 to="/checkout"
                 onClick={(e) => {
-                  if (user?.role === "b2b" && getSubtotal() < 20000) {
+                  if (user?.role === "b2b" && getSubtotal() < 2000) {
                     e.preventDefault();
                   }
                 }}
                 className={`w-full py-3 rounded-xl font-bold text-base transition-all duration-300 text-center block ${
-                  user?.role === "b2b" && getSubtotal() < 20000
+                  user?.role === "b2b" && getSubtotal() < 2000
                     ? "bg-gray-600 text-gray-400 cursor-not-allowed"
                     : "bg-gradient-to-r from-amber-400 to-yellow-500 text-black hover:shadow-amber-400/30"
                 }`}

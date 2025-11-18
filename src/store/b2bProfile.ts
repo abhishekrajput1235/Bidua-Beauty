@@ -2,6 +2,8 @@
 import { create } from "zustand";
 import axios, { AxiosError } from "axios";
 import { useAuthStore } from "./authStore";
+const API_BASE = `${import.meta.env.VITE_BACKEND_URL}/api/v1/b2b`
+
 
 /**
  * Types
@@ -91,10 +93,6 @@ interface BusinessProfileStore {
   resetStatus: () => void;
 }
 
-/**
- * API base
- */
-const API_BASE = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/b2b` : "http://localhost:5000/api/v1/b2b";
 
 /**
  * Axios instance (minimal). It will add Authorization header using token from authStore.
