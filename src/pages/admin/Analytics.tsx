@@ -199,7 +199,7 @@ export default function Analytics() {
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: 'rgba(17, 24, 39, 0.95)',
+                    backgroundColor: '#FFF58A',
                     border: '1px solid #374151',
                     borderRadius: '8px',
                     color: '#fff'

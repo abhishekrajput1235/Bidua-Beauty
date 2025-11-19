@@ -32,10 +32,10 @@ const AdminLayout = () => {
   return (
     <div
       className={`flex min-h-screen ${
-        theme === "dark" ? "bg-gray-900 text-gray-100" : "bg-gray-50 text-gray-900"
+        theme === "dark" ? " text-gray-100" : " text-gray-900"
       }`}
     >
-      {/* 🧱 Sidebar */}
+      {/*  Sidebar */}
       <aside
         className={`${
           isOpen ? "translate-x-0" : "-translate-x-full"

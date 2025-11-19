@@ -1,15 +1,17 @@
 import { create } from 'zustand';
 import axios from 'axios';
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { useAuthStore } from './authStore';
+
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 interface Transaction {
   _id?: string;
-  type: 'credit' | 'debit';
+  type: 'credit' | 'debit' | 'withdrawal';
   amount: number;
   description?: string;
-  method?: 'razorpay' | 'cod' | 'refund' | 'manual' | 'reward' | 'adjustment';
+  method?: 'razorpay' | 'cod' | 'refund' | 'manual' | 'reward' | 'adjustment' | 'withdrawal';
   orderId?: string;
-  status?: 'success' | 'pending' | 'failed';
+  status?: 'success' | 'pending' | 'failed' | 'approved' | 'rejected';
   balanceAfter?: number;
   createdAt?: string;
 }
@@ -30,7 +32,7 @@ interface WalletState {
   error: string | null;
   getWallet: () => Promise<void>;
   addTransaction: (transactionData: Transaction) => Promise<void>;
-  getWalletTransactions: () => Promise<void>;
+  requestWithdrawal: (amount: number) => Promise<void>;
 }
 
 const useWalletStore = create<WalletState>((set) => ({
@@ -41,32 +43,62 @@ const useWalletStore = create<WalletState>((set) => ({
   getWallet: async () => {
     set({ loading: true, error: null });
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/v1/wallet`);
-      set({ wallet: response.data, loading: false });
-    } catch (error) {
-      set({ error: 'Failed to fetch wallet', loading: false });
+      const { token } = useAuthStore.getState();
+      if (!token) {
+        throw new Error("No authentication token found.");
+      }
+      const response = await axios.get<{ data: Wallet }>(`${API_BASE_URL}/api/v1/wallet`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      set({ wallet: response.data.data, transactions: response.data.data.transactions || [], loading: false });
+    } catch (error: any) {
+      set({ error: `Failed to fetch wallet: ${error.response?.data?.msg || error.message}`, loading: false });
     }
   },
   addTransaction: async (transactionData) => {
     set({ loading: true, error: null });
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/v1/wallet/transactions`, transactionData);
+      const { token } = useAuthStore.getState();
+      if (!token) {
+        throw new Error("No authentication token found.");
+      }
+      const response = await axios.post<{ data: Wallet }>(`${API_BASE_URL}/api/v1/wallet/transactions`, transactionData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       set((state) => ({
         ...state,
-        wallet: response.data,
+        wallet: response.data.data,
+        transactions: response.data.data.transactions || [],
         loading: false,
       }));
-    } catch (error) {
-      set({ error: 'Failed to add transaction', loading: false });
+    } catch (error: any) {
+      set({ error: `Failed to add transaction: ${error.response?.data?.msg || error.message}`, loading: false });
     }
   },
-  getWalletTransactions: async () => {
+  requestWithdrawal: async (amount) => {
     set({ loading: true, error: null });
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/v1/wallet/transactions`);
-      set({ transactions: response.data, loading: false });
-    } catch (error) {
-      set({ error: 'Failed to fetch transactions', loading: false });
+      const { token } = useAuthStore.getState();
+      if (!token) {
+        throw new Error("No authentication token found.");
+      }
+      const response = await axios.post<{ data: Wallet }>(`${API_BASE_URL}/api/v1/wallet/withdraw`, { amount }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      set((state) => ({
+        ...state,
+        wallet: response.data.data,
+        transactions: response.data.data.transactions || [],
+        loading: false,
+      }));
+    } catch (error: any) {
+      set({ error: `Failed to request withdrawal: ${error.response?.data?.msg || error.message}`, loading: false });
     }
   },
 }));

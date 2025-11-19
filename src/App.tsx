@@ -32,6 +32,8 @@ import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import ContactUsPage from "./pages/ContactUsPage";
 import ProtectedAdminRoute from "./components/auth/ProtectedAdminRoute";
+import SupportPage from "./pages/SupportPage";
+import ManageAccount from "./pages/ManageAccount";
 
 // 🧠 Admin Imports
 import { ThemeProvider } from "./admincontexts/ThemeContext";
@@ -43,6 +45,7 @@ import Customers from "./pages/admin/Customers";
 import Analytics from "./pages/admin/Analytics";
 import Settings from "./pages/admin/Settings";
 import PaymentsHistory from "./pages/admin/PaymentsHistory";
+import NotFoundPage from "./pages/NotFoundPage";
 import MyOrdersPage from "./pages/MyOrdersPage";
 
 function App() {
@@ -86,6 +89,9 @@ function App() {
         <Route path="/products" element={<ProductsPage />} />
         <Route path="/products/:id" element={<ProductDetailsPage />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+        <Route path="/support" element={<SupportPage />}/>
+        <Route path="/account/settings" element={<ManageAccount />} />
+
         <Route
           path="/terms-and-condition"
           element={<TermsAndConditionsPage />}
@@ -114,6 +120,7 @@ function App() {
           <Route path="analytics" element={<Analytics />} />
           <Route path="settings" element={<Settings />} />
         </Route>
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </div>
   );
