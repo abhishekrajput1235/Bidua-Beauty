@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   Mail,
   Phone,
-  MessageCircle,
   ChevronDown,
   HelpCircle,
   Headphones,
@@ -10,6 +9,9 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const FAQItem = ({ question, answer }) => {
   const [open, setOpen] = useState(false);
@@ -36,8 +38,56 @@ const FAQItem = ({ question, answer }) => {
 };
 
 const SupportPage = () => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+  });
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const { name, email, subject, message } = formData;
+
+    if (!name || !email || !subject || !message) {
+      toast.error("All fields are required");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/v1/contact`,
+        formData
+      );
+      toast.success("Message sent successfully!");
+      setFormData({ name: "", email: "", subject: "", message: "" });
+    } catch (error) {
+      toast.error("Failed to send message. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-black text-gray-100 p-4 sm:p-8">
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
       <div className="max-w-5xl mx-auto">
 
         {/* BACK BUTTON */}
@@ -120,11 +170,14 @@ const SupportPage = () => {
             Send Us a Message
           </h2>
 
-          <form className="space-y-5">
+          <form className="space-y-5" onSubmit={handleSubmit}>
             <div>
               <label className="text-gray-300 text-sm">Your Name</label>
               <input
                 type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
                 className="w-full mt-1 bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-amber-400/50 outline-none"
                 placeholder="Enter your name"
               />
@@ -134,14 +187,32 @@ const SupportPage = () => {
               <label className="text-gray-300 text-sm">Email Address</label>
               <input
                 type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
                 className="w-full mt-1 bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-amber-400/50 outline-none"
                 placeholder="Enter your email"
               />
             </div>
 
             <div>
+              <label className="text-gray-300 text-sm">Subject</label>
+              <input
+                type="text"
+                name="subject"
+                value={formData.subject}
+                onChange={handleChange}
+                className="w-full mt-1 bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-amber-400/50 outline-none"
+                placeholder="Enter the subject"
+              />
+            </div>
+
+            <div>
               <label className="text-gray-300 text-sm">Message</label>
               <textarea
+                name="message"
+                value={formData.message}
+                onChange={handleChange}
                 className="w-full mt-1 bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white h-28 focus:ring-2 focus:ring-amber-400/50 outline-none"
                 placeholder="Type your message"
               ></textarea>
@@ -149,10 +220,10 @@ const SupportPage = () => {
 
             <button
               type="submit"
-              className="flex items-center gap-2 bg-amber-400 text-black px-6 py-3 rounded-full font-bold hover:bg-amber-500 transition"
+              disabled={loading}
+              className="flex items-center gap-2 bg-amber-400 text-black px-6 py-3 rounded-full font-bold hover:bg-amber-500 transition disabled:bg-gray-500"
             >
-              <Send className="w-4 h-4" />
-              Submit
+              {loading ? "Sending..." : <><Send className="w-4 h-4" /> Submit</>}
             </button>
           </form>
         </div>
