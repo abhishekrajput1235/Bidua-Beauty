@@ -23,6 +23,8 @@ interface Wallet {
   currency: string;
   transactions: Transaction[];
   isActive: boolean;
+  totalRealized: number;
+  escrowPending: number;
 }
 
 interface WalletState {
@@ -30,6 +32,8 @@ interface WalletState {
   transactions: Transaction[];
   loading: boolean;
   error: string | null;
+  totalRealized: number;
+  escrowPending: number;
   getWallet: () => Promise<void>;
   addTransaction: (transactionData: Transaction) => Promise<void>;
   requestWithdrawal: (amount: number) => Promise<void>;
@@ -40,6 +44,8 @@ const useWalletStore = create<WalletState>((set) => ({
   transactions: [],
   loading: false,
   error: null,
+  totalRealized: 0,
+  escrowPending: 0,
   getWallet: async () => {
     set({ loading: true, error: null });
     try {
@@ -52,7 +58,13 @@ const useWalletStore = create<WalletState>((set) => ({
           Authorization: `Bearer ${token}`,
         },
       });
-      set({ wallet: response.data.data, transactions: response.data.data.transactions || [], loading: false });
+      set({
+        wallet: response.data.data,
+        transactions: response.data.data.transactions || [],
+        totalRealized: response.data.data.totalRealized,
+        escrowPending: response.data.data.escrowPending,
+        loading: false
+      });
     } catch (error: any) {
       set({ error: `Failed to fetch wallet: ${error.response?.data?.msg || error.message}`, loading: false });
     }

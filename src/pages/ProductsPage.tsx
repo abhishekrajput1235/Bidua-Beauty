@@ -55,7 +55,6 @@ const ProductsPage = () => {
       const success = await addToCart(product.productId, qty);
 
       if (success) {
-        alert("Item added to cart successfully.");
         toast.success("Item added successfully.", { position: "top-right", autoClose: 3000 });
       }
     } catch (error: any) {
@@ -157,7 +156,7 @@ const ProductsPage = () => {
                         <div className="flex justify-center items-center rounded-lg border border-yellow-300 px-8 py-1 text-sm w-12 text-center bg-gray-800 text-white">{qty}</div>
                         <button
                           onClick={() => !isOutOfStock && handleQtyChange(product._id, 1, availableUnits)}
-                          disabled={isOutOfStock}
+                          disabled={isOutOfStock || qty >= availableUnits}
                           className="flex justify-center items-center rounded-lg border border-yellow-300 px-4 py-1 bg-gray-700 text-white hover:bg-gray-600 transition"
                         >
                           +

@@ -21,6 +21,8 @@ const PartnerWalletPage = () => {
     error,
     getWallet,
     requestWithdrawal,
+    totalRealized,
+    escrowPending,
   } = useWalletStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [amount, setAmount] = useState(0);
@@ -35,12 +37,6 @@ const PartnerWalletPage = () => {
   const txns = Array.isArray(transactions) ? transactions : [];
 
   const availableBalance = wallet?.balance || 0;
-  const totalRealized = txns
-    .filter((t) => t.type === "credit")
-    .reduce((acc, t) => acc + (t.amount || 0), 0);
-  const escrowPending = txns
-    .filter((t) => t.status === "pending")
-    .reduce((acc, t) => acc + (t.amount || 0), 0);
 
   const realizations = txns;
 
@@ -259,7 +255,8 @@ const PartnerWalletPage = () => {
               </button>
               <button
                 onClick={handleWithdrawal}
-                className="bg-amber-500 text-black px-4 py-2 rounded"
+                disabled={amount <= 0 || amount > availableBalance}
+                className="bg-amber-500 text-black px-4 py-2 rounded disabled:bg-gray-500 disabled:cursor-not-allowed"
               >
                 Submit
               </button>

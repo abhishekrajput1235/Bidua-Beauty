@@ -45,8 +45,15 @@ const CartPage = () => {
     (cart as unknown as CartItem[]).reduce(
       (acc: number, item: CartItem) =>
         acc +
-        (user?.role === "b2b" && item.b2bPrice ? item.b2bPrice : item.sellingPrice) *
+        (item.isB2b && item.b2bPrice ? item.b2bPrice : item.sellingPrice) *
           (item.quantity || 0),
+      0
+    );
+
+  const getB2bSubtotal = () =>
+    (cart as unknown as CartItem[]).reduce(
+      (acc: number, item: CartItem) =>
+        item.isB2b ? acc + (item.b2bPrice || 0) * (item.quantity || 0) : acc,
       0
     );
 
@@ -123,9 +130,9 @@ const CartPage = () => {
               const isOutOfStock = availableUnits === 0;
               const hasReachedLimit = item.quantity >= availableUnits;
 
-              // Decide price based on user role
+              // Decide price based on the item's catalog origin
               const displayPrice =
-                user?.role === "b2b" && item.b2bPrice ? item.b2bPrice : item.sellingPrice;
+                item.isB2b && item.b2bPrice ? item.b2bPrice : item.sellingPrice;
 
               return (
                 <div
@@ -244,7 +251,7 @@ const CartPage = () => {
               <div className="space-y-3 mb-4">
                 {(cart as unknown as CartItem[])?.map((item) => {
                   const displayPrice =
-                    user?.role === "b2b" && item.b2bPrice ? item.b2bPrice : item.sellingPrice;
+                    item.isB2b && item.b2bPrice ? item.b2bPrice : item.sellingPrice;
                   return (
                     <div
                       key={item._id}
@@ -274,21 +281,22 @@ const CartPage = () => {
                 </div>
               </div>
 
-              {user?.role === "b2b" && getSubtotal() < 2000 && (
+              {user?.role === "b2b" && getB2bSubtotal() > 0 && getB2bSubtotal() < 20000 && (
                 <div className="bg-red-500/10 border border-red-500/30 text-red-300 p-3 rounded-xl text-center mb-4">
-                  <p className="font-semibold text-sm">A minimum order of ₹20,000 is required for B2B users.</p>
+                  <p className="font-semibold text-sm">A minimum order of ₹20,000 is required for B2B catalog items.</p>
                 </div>
               )}
 
               <Link
                 to="/checkout"
                 onClick={(e) => {
-                  if (user?.role === "b2b" && getSubtotal() < 2000) {
+                  const b2bSubtotal = getB2bSubtotal();
+                  if (user?.role === "b2b" && b2bSubtotal > 0 && b2bSubtotal < 20000) {
                     e.preventDefault();
                   }
                 }}
                 className={`w-full py-3 rounded-xl font-bold text-base transition-all duration-300 text-center block ${
-                  user?.role === "b2b" && getSubtotal() < 2000
+                  user?.role === "b2b" && getB2bSubtotal() > 0 && getB2bSubtotal() < 20000
                     ? "bg-gray-600 text-gray-400 cursor-not-allowed"
                     : "bg-gradient-to-r from-amber-400 to-yellow-500 text-black hover:shadow-amber-400/30"
                 }`}

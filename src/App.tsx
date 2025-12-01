@@ -52,7 +52,12 @@ function App() {
   return (
     <div className="min-h-screen">
       {/* ✅ Toasts */}
-      <ToastContainer position="top-right" autoClose={3000} theme="colored" />
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        theme="colored"
+        style={{ zIndex: 999999 }}
+      />
 
       <Routes>
         {/* 🌐 MAIN WEBSITE ROUTES */}

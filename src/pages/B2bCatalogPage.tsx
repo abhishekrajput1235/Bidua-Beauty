@@ -11,7 +11,7 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "";
 const B2bCatalogPage: React.FC = () => {
   const { user } = useAuthStore();
   const { fetchProducts, loading, error, products } = useProductStore();
-  const { addToCart } = useCartStore();
+  const { addToCart, cart } = useCartStore();
 
   const [quantities, setQuantities] = useState<Record<string, number>>({});
 
@@ -24,7 +24,6 @@ const B2bCatalogPage: React.FC = () => {
   }, [error]);
 
   const isB2B = user?.role === 'b2b';
-  console.log("User role:", user?.role, "isB2B:", isB2B);
 
   const computeAvailableUnits = (product: any): number => {
     if (Array.isArray(product.units) && product.units.length > 0) {
@@ -75,7 +74,7 @@ const B2bCatalogPage: React.FC = () => {
       const idForCart = product.productId ?? product._id;
       if (!idForCart) throw new Error("Invalid product id.");
 
-      await addToCart(idForCart, qty);
+      await addToCart(idForCart, qty, true);
 
       toast.success("Item added successfully.", { position: "top-right", autoClose: 3000 });
     } catch (err: any) {
@@ -158,6 +157,7 @@ const B2bCatalogPage: React.FC = () => {
           const defaultQty = availableUnits >= minQty ? minQty : 0;
           const qty = quantities[product._id] ?? defaultQty;
           const isOutOfStock = availableUnits === 0;
+          const isInCart = cart.some((item: any) => item.productId === product.productId);
 
           return (
             <div key={product._id} className="bg-gradient-to-br from-gray-800/50 to-black/50 backdrop-blur-sm border border-gray-700/50 rounded-3xl p-4 sm:p-6 shadow-sm flex flex-col relative">
@@ -219,21 +219,31 @@ const B2bCatalogPage: React.FC = () => {
                 </button>
               </div>
 
-              <button
-                onClick={() => handleAddToCart(product)}
-                disabled={isOutOfStock || qty < minQty || !isB2B}
-                className={`w-full py-2.5 sm:py-3 rounded-xl font-semibold text-black flex items-center justify-center space-x-2 transition-all duration-300 mt-auto ${
-                  isOutOfStock || !isB2B ? "bg-gray-500 cursor-not-allowed" : "bg-gradient-to-r from-amber-400 to-yellow-500 hover:shadow-2xl hover:shadow-amber-400/25"
-                }`}
-              >
-                <Package className="w-4 h-4 sm:w-5 sm:h-5" />
-                <span>{isOutOfStock ? "Out of Stock" : "Add to Order"}</span>
-              </button>
+              {isInCart ? (
+                <Link
+                  to="/cart"
+                  className={`w-full py-2.5 sm:py-3 rounded-xl font-semibold text-black flex items-center justify-center space-x-2 transition-all duration-300 mt-auto bg-gradient-to-r from-green-400 to-green-600 hover:shadow-2xl hover:shadow-green-400/25`}
+                >
+                  <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span>Proceed to Checkout</span>
+                </Link>
+              ) : (
+                <button
+                  onClick={() => handleAddToCart(product)}
+                  disabled={isOutOfStock || qty < minQty || !isB2B}
+                  className={`w-full py-2.5 sm:py-3 rounded-xl font-semibold text-black flex items-center justify-center space-x-2 transition-all duration-300 mt-auto ${
+                    isOutOfStock || !isB2B ? "bg-gray-500 cursor-not-allowed" : "bg-gradient-to-r from-amber-400 to-yellow-500 hover:shadow-2xl hover:shadow-amber-400/25"
+                  }`}
+                >
+                  <Package className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span>{isOutOfStock ? "Out of Stock" : "Add to Order"}</span>
+                </button>
+              )}
             </div>
           );
         })}
       </div>
-      <div className="mt-12 flex justify-center">
+      {/* <div className="mt-12 flex justify-center">
         <Link
           to={isB2B ? "/cart" : "#"}
           onClick={(e) => !isB2B && e.preventDefault()}
@@ -243,7 +253,7 @@ const B2bCatalogPage: React.FC = () => {
         >
           Proceed to Checkout
         </Link>
-      </div>
+      </div> */}
     </div>
   );
 };
